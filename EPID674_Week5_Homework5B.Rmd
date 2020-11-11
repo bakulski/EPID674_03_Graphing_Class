@@ -1,0 +1,52 @@
+---
+title: "EPID674 Epidemiologic Data Analysis using R"
+subtitle: "Homework 5B"
+author: "Insert Your Name Here"
+date: "Last compiled on `r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  word_document: default
+---
+
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(foreign)
+library(epiDisplay)
+library(stats)
+library(Hmisc)
+library(gmodels)
+
+directory <- "/cloud/project/"
+```
+
+# Using the dataset “bpa.sas7bdat”, answer the following. Include appropriate titles, labels and legends in all graphs.
+
+
+# Problem 1
+## Create a multi-frame plot and include 1) a bar chart of the race/ethnicity distribution; 2) a histogram of log-transformed HDL with males and females plotted separately; 3) boxplot of log-transformed urinary BPA by age quartiles; and 4) scatterplot with smoothing trend lines between age (in x-axis) and total cholesterol (in y-axis) by sex. 
+
+```{r problem 1}
+#Insert code for problem 1 here
+```
+# Include plot for problem 1 here
+
+# Problem 2
+# You want to describe the association between HDL (dependent variable, continuous) and urinary BPA (independent variable, continuous). First determine whether log-transformation for HDL is required. Create a scatterplot for HDL and urinary BPA. Add a least square line. What is the relationship between HDL and urinary BPA?
+
+```{r problem 2}
+#Insert code for problem 2 here
+```
+# Include plot for problem 2 here
+# Interpret results for problem 2 here
+
+# Problem 3
+# Is the association between HDL and urinary BPA linear? Check this out using a smoothing plot (lowess) from the ggplot2 package or smooth.spline() in base graphics.
+
+```{r problem 3}
+#Insert code for problem 3 here
+```
+# Include plot for problem 3 here
+# Interpret results for problem 3 here
+
+
