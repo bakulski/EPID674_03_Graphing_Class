@@ -412,8 +412,6 @@ panel.hist <- function(x, ...) {
 
 # Put it all together
 pairs(cbind(nhanes$sbp, nhanes$bpb, nhanes$bmi, nhanes$age), main = "Pairwise Relationships", pch = 20, cex = 0.4, font.labels = 2, cex.labels = 2, col = "dodgerblue", upper.panel = panel.cor, diag.panel = panel.hist, lower.panel = panel.smooth)
-
-
 ```
 
 ```{r scatterplot_matrix_ggplot2}
