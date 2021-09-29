@@ -14,13 +14,11 @@ knitr::opts_chunk$set(echo = TRUE)
 library(foreign)
 library(epiDisplay)
 library(stats)
-library(Hmisc)
 library(gmodels)
-
-directory <- "/cloud/project/"
+library(here)
 ```
 
-# Using the dataset “bpa.sas7bdat”, answer the following. Include appropriate titles, labels and legends in all graphs.
+# Using the dataset “bpa.rda”, answer the following. Include appropriate titles, labels and legends in all graphs.
 
 # T2DM can be defined as hemoglobin A1c ≥ 6.5% OR use of diabetes medication. Note: participants with high A1c and taking medication should also be considered T2DM cases.
 

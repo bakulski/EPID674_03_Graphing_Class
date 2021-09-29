@@ -1,12 +1,14 @@
 ---
 title: "EPID674 Epidemiologic Data Analysis using R"
-subtitle: "Graphing in R"
 author: "Kelly Bakulski"
 date: "Last compiled on `r format(Sys.Date(), '%B %d, %Y')`"
 output:
+  word_document:
+    toc: yes
   html_document:
     toc: yes
     toc_float: yes
+subtitle: Graphing in R
 ---
 
 # Set up options
@@ -19,13 +21,13 @@ knitr::opts_chunk$set(echo = TRUE)
 # Install packages. Do this only once.
 options(repos="https://cran.rstudio.com" )
 install.packages("epiDisplay")
-install.packages("Hmisc")
 install.packages("ggplot2")
 install.packages("GGally")
 install.packages("vioplot")
 install.packages("forestplot")
+install.packages("here")
 
-# To avoid installing every time: change set up in curly brackets to eval=FALSE
+# To avoid installing every time you knit: keep curly brackets eval=FALSE
 ```
 
 
@@ -37,21 +39,17 @@ library(ggplot2)
 library(GGally)
 library(vioplot)
 library(forestplot)
+library(here)
 ```
 
-
-# Specify relative file directories
-```{r directories}
-directory <- "/cloud/project" #Class option when coding on RStudio Cloud, update for your personal computer
-```
 
 
 # Load data, remake useful variables
 ```{r read_data}
 # Check the file path
-file.path(directory, "nhanes3.rda")
+here("nhanes3.rda")
 # Load the saved R data
-load(file.path(directory, "nhanes3.rda"))
+load(here("nhanes3.rda"))
 
 
 # Remake a few variables from last class 
@@ -81,7 +79,7 @@ rug(nhanes$bmi, side = 1)
 # x11() #pc or mac (kind of slow)
 
 # If you want to save your plot directly to file, use pdf(), png(), jpg(), etc. Close the plotting with dev.off()
-pdf(file = file.path(directory, "BMI_plot.pdf"))
+pdf(file = here("BMI_plot.pdf"))
 plot(nhanes$bmi, nhanes$chol, pch = 20, cex = 0.8, ylab = "Cholesterol in mg/dL", xlab = expression(paste("BMI in kg/m"^"2")), main = "Association between Cholesterol and BMI", las = 1, col = "dodgerblue")
 rug(nhanes$bmi, side = 1)
 dev.off()
@@ -103,7 +101,6 @@ barplot(table(nhanes$smk, nhanes$sex1), las = 1)
 
 # add legends
 barplot(table(nhanes$smk, nhanes$sex1), col = c(2:4), legend = c("Never", "Former", "Current"), las = 1)
-barplot(table(nhanes$smk, nhanes$sex1), col = c(2:4), legend.text = TRUE, args.legend = list(x = "topleft", legend = c("Never", "Former", "Current"), bty = "n", ncol = 3, cex = 0.7), las = 1)
 barplot(table(nhanes$smk, nhanes$sex1), col = c(2:4), las = 1)
 legend(x = "topleft", legend = c("Never", "Former", "Current"), bty = "n", ncol = 3, cex = 0.7, fill = c(2:4))
 barplot(table(nhanes$smk, nhanes$sex1), col = c(2:4), legend = levels(nhanes$smk), beside = T)
@@ -117,11 +114,11 @@ barplot(prop.table(table(nhanes$smk, nhanes$sex1)), col = c(2:4), las = 1, ylab 
 
 ```{r barplot_ggplot2_package}
 # barplot, ggplot2 package
-ggplot(nhanes, aes(sex1)) + geom_bar()
-ggplot(nhanes, aes(sex1, fill = sex1, color = sex1)) + geom_bar()
+ggplot(nhanes, aes(x = sex1)) + geom_bar()
+ggplot(nhanes, aes(x = sex1, fill = sex1, color = sex1)) + geom_bar()
 
 # horizontal
-ggplot(nhanes, aes(sex1, fill = sex1, color = sex1)) + geom_bar() + coord_flip()
+ggplot(nhanes, aes(x = sex1, fill = sex1, color = sex1)) + geom_bar() + coord_flip()
 ```
 
 
@@ -156,16 +153,16 @@ legend("topright", fill = c("firebrick1", "dodgerblue"), legend = c("Male", "Fem
 
 ```{r histogram_ggplot2}
 # Histogram, ggplot2 package
-ggplot(nhanes, aes(age)) + geom_histogram()
-ggplot(nhanes, aes(age)) + geom_histogram(binwidth = 10)
+ggplot(nhanes, aes(x = age)) + geom_histogram()
+ggplot(nhanes, aes(x = age)) + geom_histogram(binwidth = 10)
 
 # add density plot
-ggplot(nhanes, aes(sbp, ..density..)) + geom_histogram(fill = "lightgreen", color = "green", binwidth = 15) + geom_density()
+ggplot(nhanes, aes(x = sbp, ..density..)) + geom_histogram(fill = "lightgreen", color = "green", binwidth = 15) + geom_density()
 
 # overlapping histograms
-ggplot(nhanes, aes(sbp, fill = sex1)) + geom_histogram() + facet_grid(sex1 ~ .)
-ggplot(nhanes, aes(sbp, fill = sex1)) + geom_histogram()
-ggplot(nhanes, aes(sbp, fill = sex1)) + geom_histogram() + scale_fill_grey(start = 0, end = 0.75)
+ggplot(nhanes, aes(x = sbp, fill = sex1)) + geom_histogram() + facet_grid(sex1 ~ .)
+ggplot(nhanes, aes(x = sbp, fill = sex1)) + geom_histogram(binwidth = 10)
+ggplot(nhanes, aes(x = sbp, fill = sex1)) + geom_histogram(binwidth = 10, position="identity", alpha=0.8) + scale_fill_grey(start = 0, end = 0.75)
 ```
 
 
@@ -207,13 +204,13 @@ title("Log(Blood Lead Level) by Smoking Status")
 
 ```{r boxplot_ggplot2}
 # Boxplot, ggplot2 package
-ggplot(nhanes, aes(log(bpb))) + geom_boxplot(fill = "#990000",  color = "#3366FF", notch = T, notchwidth = .3)
+ggplot(nhanes, aes(x = log(bpb))) + geom_boxplot(fill = "#990000",  color = "#3366FF", notch = T, notchwidth = .3)
 
 # boxplot split by another variable
-ggplot(nhanes, aes(AGE5b, log(bpb))) + geom_boxplot()
+ggplot(nhanes, aes(x = AGE5b, y = log(bpb))) + geom_boxplot()
 
 # boxplot split by two variables
-ggplot(nhanes, aes(AGE5b, log(bpb))) + geom_boxplot(aes(fill = sex1)) + labs(title = "Boxplot of Blood Lead Levels") + scale_x_discrete("Age") + scale_y_continuous("Log(Blood lead levels)")
+ggplot(nhanes, aes(x = AGE5b, y = log(bpb))) + geom_boxplot(aes(fill = sex1)) + labs(title = "Boxplot of Blood Lead Levels") + scale_x_discrete("Age") + scale_y_continuous("Log(Blood lead levels)")
 ```
 
 ########################################
@@ -241,6 +238,11 @@ for (i in 1:5) {
 axis(1, cex.axis = 1.2)
 axis(2, at = x.num, labels = x1, las = 1, lwd = 0, cex.axis = 1.2, pos = .3) # pos is x-axis location of labels
 segments(1, 0, 1, 7.5, lty = 2)
+```
+
+```{r forest_plot_ggplot2}
+# Forest plot, ggplot2 package
+ggplot(results, aes(x = or, y = x1,  xmin = or.ll, xmax = or.ul)) + geom_pointrange() + xlab("Odds Ratio") + ylab("Group") + geom_vline(xintercept = 1, linetype = 2)  
 ```
 
 
@@ -276,17 +278,12 @@ forestplot(tabletext,
 )
 ```
 
-```{r forest_plot_ggplot2}
-# Forest plot, ggplot2 package
-ggplot(results, aes(y=x1, x=or, xmin=or.ll, xmax=or.ul)) + geom_pointrange() + xlab("Odds Ratio") + ylab("Group") + geom_vline(xintercept = 1, linetype = 2)  
-```
-
 ```{r scatterplot_base}
 # Scatterplot, base graphics
 plot(nhanes$age, log(nhanes$bpb))
 plot(nhanes$age, log(nhanes$bpb), xlab = "Age", ylab = "Log(Blood lead, ug/dL)", las = 1, cex.lab = 1.2, cex=0.2)
 title("Scatterplot of Age vs. Blood Lead")
-abline(lsfit(nhanes$age, log(nhanes$bpb)), col = "firebrick1", lwd = 3)
+abline(lm( log(nhanes$bpb) ~ nhanes$age), col = "firebrick1", lwd = 3)
 # identify(age,log(bpb))
 # Tool to location spots on the plot
 # locator()
@@ -306,22 +303,22 @@ lines(smooth.spline(nhanes$age, log(nhanes$bpb), df = 10), col = "dodgerblue", l
 nomiss <- na.omit(data.frame(nhanes$age, nhanes$bmi)) # make an object without missing
 dim(nomiss)
 head(nomiss)
-plot(nomiss$nhanes.age, nomiss$nhanes.bmi, xlab = "Age", ylab = "Log(BMI)", las = 1, cex.lab = 1.2, pch = 20, cex = 0.6)
+plot(nomiss$nhanes.age, nomiss$nhanes.bmi, xlab = "Age", ylab = "BMI", las = 1, cex.lab = 1.2, pch = 20, cex = 0.6)
 title("Scatterplot of Age vs. BMI")
 lines(smooth.spline(nomiss$nhanes.age, nomiss$nhanes.bmi, df = 10), col = "dodgerblue", lwd = 3)
 
 # or restrict to nonmissing within the smooth.spline function
-plot(nhanes$age, nhanes$bmi, xlab = "Age", ylab = "Log(BMI)", las = 1, cex.lab = 1.2, pch = 20, cex = 0.6)
+plot(nhanes$age, nhanes$bmi, xlab = "Age", ylab = "BMI", las = 1, cex.lab = 1.2, pch = 20, cex = 0.6)
 title("Scatterplot of Age vs. BMI")
 lines(smooth.spline(nhanes$age[!is.na(nhanes$bmi)], na.omit(nhanes$bmi), df = 10), col = "dodgerblue", lwd = 3)
 ```
 
 ```{r scatterplot_by_group}
 ## Scatterplots by group
-plot(nhanes$age, log(nhanes$bpb), xlab = "Age", ylab = "Log(Blood lead)", pch = nhanes$sex, col = c("seagreen", "darkorchid")[nhanes$sex], cex = 0.5, las = 1, cex.lab = 1.2)
-abline(lsfit(nhanes$age[nhanes$sex == 1], log(nhanes$bpb)[nhanes$sex == 1]), lty = 1, lwd = 3, col = "seagreen")
-abline(lsfit(nhanes$age[nhanes$sex == 2], log(nhanes$bpb)[nhanes$sex == 2]), lty = 1, lwd = 3, col = "darkorchid")
-legend("topleft", c("Male", "Female"), lty = c(1, 1), pch = c(1, 2), col = c("seagreen", "darkorchid"))
+plot(nhanes$age, log(nhanes$bpb), xlab = "Age", ylab = "Log(Blood lead)", pch = nhanes$sex, col = c("seagreen", "darkorchid")[nhanes$sex], cex = 0.3, las = 1, cex.lab = 1.2)
+abline(lm(log(nhanes$bpb)[nhanes$sex == 1] ~ nhanes$age[nhanes$sex == 1]), lty = 1, lwd = 3, col = "seagreen")
+abline(lm(log(nhanes$bpb)[nhanes$sex == 2] ~ nhanes$age[nhanes$sex == 2]), lty = 2, lwd = 3, col = "darkorchid")
+legend("topleft", c("Male", "Female"), lty = c(1, 1), pch = c(1, 2), col = c("seagreen", "darkorchid"), bty="n")
 
 # dealing with dense data overplotting
 smoothScatter(nhanes$age, log(nhanes$bpb), ylab = "Log(Blood lead)", xlab = "Age", las = 1, cex.lab = 1.2)
@@ -329,35 +326,35 @@ smoothScatter(nhanes$age, log(nhanes$bpb), ylab = "Log(Blood lead)", xlab = "Age
 
 ```{r scatterplot_ggplot2}
 # Scatterplot, ggplot2 package
-ggplot(nhanes, aes(age, log(bpb))) + geom_point(shape = 1) # open circles
+ggplot(nhanes, aes(x = age, y = log(bpb))) + geom_point(shape = 1) # open circles
 
 ## add a linear fit
-ggplot(nhanes, aes(age, log(bpb))) + geom_point() + geom_smooth(method = lm)
+ggplot(nhanes, aes(x = age, y = log(bpb))) + geom_point() + geom_smooth(method = lm)
 
 ## add a smoothing line
-ggplot(nhanes, aes(age, log(bpb))) + geom_point() + geom_smooth()
+ggplot(nhanes, aes(x = age, y = log(bpb))) + geom_point() + geom_smooth()
 
 # split by another variable
-ggplot(nhanes, aes(x=age, y=log(bpb), shape=sex1)) + geom_point(aes(color=sex1, shape=sex1), size = 0.8, alpha = 0.5) + geom_smooth(method=lm, aes(color=sex1))
+ggplot(nhanes, aes(x = age, y = log(bpb), shape = sex1)) + geom_point(aes(color = sex1, shape = sex1), size = 0.8, alpha = 0.5) + geom_smooth(method = lm, aes(color = sex1))
 ```
 
 ```{r multiple_graphs_one_page_base}
 # multiple graphs on one page
 par(mfrow = c(1, 2)) # Here, make 1 row of graphs with 2 columns
 plot(nhanes$age, log(nhanes$bpb), pch = 20, cex = 0.2, ylab = "Log(Blood Lead Level)", las = 1, xlab = "Age")
-abline(lsfit(nhanes$age, log(nhanes$bpb)), col = "firebrick1", lwd = 2)
-boxplot(split(log(nhanes$bpb), nhanes$AGE5b), notch = T, las = 2, ylab = "Log(Blood Lead Level)", pch = 20, cex = 0.5)
+abline(lm(log(nhanes$bpb) ~ nhanes$age), col = "firebrick1", lwd = 2)
+boxplot(log(nhanes$bpb) ~ nhanes$AGE5b, notch = T, las = 2, ylab = "Log(Blood Lead Level)", pch = 20, cex = 0.5, xlab="Age")
 par(mfrow = c(1, 1)) # Go back to 1 row of graphs with 1 column of graphs
-## In traditional graphics, just do the graphis in order and they find their place
+## In traditional graphics, just do the graphs in order and they find their place
 ```
 
 
 ```{r multiple_plots_one_page_ggplot2}
 ## In grid, we must instead save the plot to an object
-plot1 <- ggplot(nhanes, aes(sex1, fill = sex1, color = sex1)) + geom_bar()
-plot2 <- ggplot(nhanes, aes(sbp, ..density..)) + geom_histogram(fill = "lightgreen", color = "green", binwidth = 15) + geom_density()
-plot3 <- ggplot(nhanes, aes(AGE5b, log(bpb))) + geom_boxplot()
-plot4 <- ggplot(nhanes, aes(age, log(bpb))) + geom_point(size=0.2, alpha=0.5) + geom_smooth()
+plot1 <- ggplot(nhanes, aes(x = sex1, fill = sex1, color = sex1)) + geom_bar()
+plot2 <- ggplot(nhanes, aes(x = sbp, ..density..)) + geom_histogram(fill = "lightgreen", color = "green", binwidth = 15) + geom_density()
+plot3 <- ggplot(nhanes, aes(x = AGE5b, y = log(bpb))) + geom_boxplot()
+plot4 <- ggplot(nhanes, aes(x = age, y = log(bpb))) + geom_point(size = 0.2, alpha = 0.5) + geom_smooth()
 
 ## first clear the page with the grid.newpage() function.
 ## This is an important step. Otherwise plots printed using
@@ -411,12 +408,12 @@ panel.hist <- function(x, ...) {
 }
 
 # Put it all together
-pairs(cbind(nhanes$sbp, nhanes$bpb, nhanes$bmi, nhanes$age), main = "Pairwise Relationships", pch = 20, cex = 0.4, font.labels = 2, cex.labels = 2, col = "dodgerblue", upper.panel = panel.cor, diag.panel = panel.hist, lower.panel = panel.smooth)
+pairs(cbind(nhanes$sbp, nhanes$bpb, nhanes$bmi, nhanes$age), main = "Pairwise Relationships", pch = 20, cex = 0.4, font.labels = 2, cex.labels = 2, col = "dodgerblue", upper.panel = panel.cor, diag.panel = panel.hist, lower.panel = panel.smooth, labels=c("sbp", "bpb", "bmi", "age"))
 ```
 
 ```{r scatterplot_matrix_ggplot2}
 # Scatterplot matrix, ggplot2 package
-ggpairs(nhanes[, c("sbp", "dbp", "bmi")])
+ggpairs(nhanes[, c("sbp", "dbp", "bmi", "bpb")])
 ```
 
 #########################################

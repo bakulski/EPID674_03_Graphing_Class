@@ -14,13 +14,11 @@ knitr::opts_chunk$set(echo = TRUE)
 library(foreign)
 library(epiDisplay)
 library(stats)
-library(Hmisc)
 library(gmodels)
-
-directory <- "/cloud/project/"
+library(here)
 ```
 
-# Using the dataset “bpa.sas7bdat”, answer the following. Include appropriate titles, labels and legends in all graphs.
+# Using the dataset “bpa.rda”, answer the following. Include appropriate titles, labels and legends in all graphs.
 
 
 # Problem 1
