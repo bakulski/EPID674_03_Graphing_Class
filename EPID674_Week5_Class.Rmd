@@ -20,11 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Install packages. Do this only once.
 options(repos="https://cran.rstudio.com" )
-install.packages("epiDisplay")
-install.packages("ggplot2")
-install.packages("GGally")
-install.packages("vioplot")
-install.packages("forestplot")
+install.packages("tidyverse")
 install.packages("here")
 
 # To avoid installing every time you knit: keep curly brackets eval=FALSE
@@ -33,392 +29,442 @@ install.packages("here")
 
 # Load packages
 ```{r load_packages, include=FALSE}
+
 ##### Load these packages for the current session, do this every time
-library(epiDisplay)
-library(ggplot2)
-library(GGally)
-library(vioplot)
-library(forestplot)
+library(tidyverse)
 library(here)
+library(ggpubr)
 ```
 
 
-
-# Load data, remake useful variables
+# Load data
 ```{r read_data}
+
 # Check the file path
-here("nhanes3.rda")
+here("nhanes_dataset.rda")
 # Load the saved R data
-load(here("nhanes3.rda"))
-
-
-# Remake a few variables from last class 
-sex1 <- factor(nhanes$sex, levels = c(1, 2), labels = c("male", "female"))
-AGE5b <- cut(nhanes$age, quantile(nhanes$age, c(0, .2, .4, .6, .8, 1)), include.lowest = T) # quintiles
-AGE5c <- cut(nhanes$age, breaks = c(19, 40, 50, 60, 70, 90))
-age5c <- unclass(AGE5c)
-
-nhanes <- cbind(nhanes, sex1, AGE5b, AGE5c, age5c)
+load(here("nhanes_dataset.rda"))
 ```
 
 
+# Base R Plotting
 
-```{r basic_plot_options}
-### Basic plotting functions
+```{r base_R_plots}
 
-plot(nhanes$bmi)
-plot(sort(nhanes$bmi))
-summary(nhanes$bmi)
-plot(sort(nhanes$bmi), ylim = c(12, 70), xlab = "Rank", ylab = expression(paste("BMI in kg/m"^"2")), main = "Distribution of BMI in NHANES")
+# Base R plotting functions are good for a quick look at the data
+# They can be customized, but ggplot() is much better for this and is part of tidyverse
 
-plot(nhanes$bmi, nhanes$chol, pch = 20, cex = 0.8, ylab = "Cholesterol in mg/dL", xlab = expression(paste("BMI in kg/m"^"2")), main = "Association between Cholesterol and BMI", las = 1, col = "dodgerblue")
-rug(nhanes$bmi, side = 1)
+# Histogram of iron concentrations and red blood cell counts
+hist(nhanes_dataset$LBXIRN)
+hist(nhanes_dataset$LBXRBCSI)
+
+# Scatterplot of red blood cell counts by iron concentrations
+plot(nhanes_dataset$LBXIRN, nhanes_dataset$LBXRBCSI)
 
 # If you want your plot to appear in a separate window
 # quartz() #mac only
 # x11() #pc or mac (kind of slow)
 
 # If you want to save your plot directly to file, use pdf(), png(), jpg(), etc. Close the plotting with dev.off()
-pdf(file = here("BMI_plot.pdf"))
-plot(nhanes$bmi, nhanes$chol, pch = 20, cex = 0.8, ylab = "Cholesterol in mg/dL", xlab = expression(paste("BMI in kg/m"^"2")), main = "Association between Cholesterol and BMI", las = 1, col = "dodgerblue")
-rug(nhanes$bmi, side = 1)
+pdf(file = here("RBC_Fe_plot.pdf"))
+plot(nhanes_dataset$LBXIRN, nhanes_dataset$LBXRBCSI)
 dev.off()
 ```
 
 
-
-```{r barplot_base_graphics}
-# barplot, base graphics
-table(nhanes$sex1)
-barplot(table(nhanes$sex1))
-barplot(table(nhanes$sex1), col = c("dodgerblue", "firebrick1"), las = 1, ylab = "Frequency", cex.lab = 1.2)
-
-# horizontal
-barplot(table(nhanes$sex1), col = c(2, 4), horiz = T, las = 1, cex.names = 1.2, xlab = "Frequency", cex.lab = 1.2)
-
-# barplots for subgroups
-barplot(table(nhanes$smk, nhanes$sex1), las = 1)
-
-# add legends
-barplot(table(nhanes$smk, nhanes$sex1), col = c(2:4), legend = c("Never", "Former", "Current"), las = 1)
-barplot(table(nhanes$smk, nhanes$sex1), col = c(2:4), las = 1)
-legend(x = "topleft", legend = c("Never", "Former", "Current"), bty = "n", ncol = 3, cex = 0.7, fill = c(2:4))
-barplot(table(nhanes$smk, nhanes$sex1), col = c(2:4), legend = levels(nhanes$smk), beside = T)
-legend(x = "topleft", legend = c("Never", "Former", "Current"), bty = "n", fill = c(2:4))
-
-# y-axis as proportion
-barplot(prop.table(table(nhanes$smk, nhanes$sex1)), las = 1, ylab = "Proportion of observations", cex.lab = 1.3)
-barplot(prop.table(table(nhanes$smk, nhanes$sex1)), col = c(2:4), las = 1, ylab = "Proportion of observations", cex.lab = 1.3)
-```
+# Useful websites for ggplot information:
+* for theory: **https://rkabacoff.github.io/datavis/**
+* how to code: **http://www.sthda.com/english/wiki/ggplot2-essentials**
 
 
-```{r barplot_ggplot2_package}
-# barplot, ggplot2 package
-ggplot(nhanes, aes(x = sex1)) + geom_bar()
-ggplot(nhanes, aes(x = sex1, fill = sex1, color = sex1)) + geom_bar()
-
-# horizontal
-ggplot(nhanes, aes(x = sex1, fill = sex1, color = sex1)) + geom_bar() + coord_flip()
-```
-
-
-
-```{r histogram_base_graphics}
-# Histogram, base graphics
-hist(nhanes$age)
-hist(nhanes$age, breaks = 4, col = "gray")
-hist(nhanes$age, breaks = c(20, 30, 40, 50, 60, 70, 80, 90), col = "lightblue")
-hist(nhanes$sbp, col = "dodgerblue", xlab = "Systolic Blood Pressure", main = "Blood Pressure")
-hist(nhanes$sbp, col = "dodgerblue", xlab = "Systolic Blood Pressure", main = "Blood Pressure", breaks = seq(80, 240, by = 2))
-
-# histogram with density
-hist(nhanes$sbp, breaks = 20, col = "lightblue", border = "blue", freq = F)
-lines(density(nhanes$sbp), lwd = 3)
-
-# Overlapping histograms
-tapply(nhanes$sbp, nhanes$sex1, summary)
-hist(nhanes$sbp[nhanes$sex == 1], col = rgb(1, 0, 0, 0.5), xlim = c(80, 240), ylim = c(0, 150), main = "Overlapping Histogram", xlab = "SBP", breaks = 50, las = 1)
-hist(nhanes$sbp[nhanes$sex == 2], col = rgb(0, 0, 1, 0.5), breaks = 100, add = T)
-legend("topright", legend = c("Male", "Female"), fill = c(rgb(1, 0, 0, 0.5), rgb(0, 0, 1, 0.5)), bty = "n")
-
-
-# overlapping densities
-plot(density(nhanes$sbp[nhanes$sex == 1]),
-  lwd = 4, col = "firebrick1", xlab = "Systolic Blood Pressure", las = 1,
-  ylab = "Density", main = "Overlapping Densities", ylim = c(0, 0.03)
-)
-lines(density(nhanes$sbp[nhanes$sex == 2]), lwd = 4, col = "dodgerblue", lty = 2)
-legend("topright", fill = c("firebrick1", "dodgerblue"), legend = c("Male", "Female"))
-```
+# Histogram
 
 ```{r histogram_ggplot2}
+
 # Histogram, ggplot2 package
-ggplot(nhanes, aes(x = age)) + geom_histogram()
-ggplot(nhanes, aes(x = age)) + geom_histogram(binwidth = 10)
+ggplot(nhanes_dataset,
+       aes(x = LBXRBCSI)) +
+  geom_histogram()
 
-# add density plot
-ggplot(nhanes, aes(x = sbp, ..density..)) + geom_histogram(fill = "lightgreen", color = "green", binwidth = 15) + geom_density()
+ggplot(nhanes_dataset,
+       aes(x = LBXRBCSI)) +
+  geom_histogram(binwidth = 0.25)
 
-# overlapping histograms
-ggplot(nhanes, aes(x = sbp, fill = sex1)) + geom_histogram() + facet_grid(sex1 ~ .)
-ggplot(nhanes, aes(x = sbp, fill = sex1)) + geom_histogram(binwidth = 10)
-ggplot(nhanes, aes(x = sbp, fill = sex1)) + geom_histogram(binwidth = 10, position="identity", alpha=0.8) + scale_fill_grey(start = 0, end = 0.75)
+# Add density plot
+ggplot(nhanes_dataset,
+       aes(x = LBXRBCSI, ..density..)) +
+  geom_histogram(fill = "lightgreen",
+                 color = "green",
+                 binwidth = 0.25) +
+  geom_density()
+
+
+# Stratified histograms in separate plots
+ggplot(nhanes_dataset,
+       aes(x = LBXIRN,
+           fill = sex)) +
+  geom_histogram() +
+  facet_grid(. ~ sex)
+
+# Overlapping histograms
+ggplot(nhanes_dataset,
+       aes(x = LBXIRN,
+           fill = sex)) + #stratify by sex
+  geom_histogram(binwidth = 10,
+                 position = "identity")
+
+# Make a black and white plot with transparency
+ggplot(nhanes_dataset,
+       aes(x = LBXIRN,
+           fill = sex)) +
+  geom_histogram(binwidth = 10,
+                 position = "identity",
+                 alpha = 0.8) + #transparency
+  scale_fill_grey(start = 0,
+                  end = 0.75)
+```
+
+
+# Save ggplot figures
+
+```{r}
+
+# Recommended to save figures as both pdf for high-quality viewing and png for presentations
+
+# Update the text size for saving in larger dimensions
+# Finding the right text size is trial and error until it looks good!
+histogram_nhanes_sex <- ggplot(nhanes_dataset,
+                             aes(x = LBXIRN,
+                                 fill = sex)) +
+  geom_histogram(binwidth = 10,
+                 position = "identity") +
+  labs(x = "Iron (ug/dL)") +
+  theme(axis.text = element_text(color = "black", #change the color and text size of labels
+                                   size = 20),
+        axis.title = element_text(size = 25),   #change the text size of axis titles
+        title = element_text(size = 30)) +      #change the text size of plot title
+  theme(legend.title = element_text(size = 25), #change the text size of legend title
+        legend.text = element_text(size = 20))  #change the text size of legend labels
+
+
+# Save the plot as a pdf for viewing at a high resolution
+ggsave(filename = ("histogram_by_sex.pdf"),
+       plot = histogram_nhanes_sex,
+       width = 14,
+       height = 9)
+
+# Save the plot as a png for presentation
+ggsave(filename = here("histogram_by_sex.png"),
+       plot = histogram_nhanes_sex,
+       units = "in",
+       width = 14,
+       height = 9,
+       dpi = 300)
 ```
 
 
 
-```{r boxplot_base_graphics}
-# Boxplot, base graphics
-median(nhanes$bpb)
-quantile(nhanes$bpb)
-quantile(nhanes$bpb, c(0.1, 0.9))
-boxplot(nhanes$bpb)
-rug(nhanes$bpb, side = 2)
-boxplot(log(nhanes$bpb), col = "lightgray")
+# Make a barplot
 
-# split boxes by another variable
-table(nhanes$smk)
-boxplot(nhanes$bmi ~ nhanes$smk, col = c("seagreen", "dodgerblue", "darkorchid"), names = c("Never", "Former", "Current"), las = 1, ylab = "BMI", cex.lab = 1.3, xlab = "Smoking Status")
+```{r barplot_ggplot2_package}
 
-# options for boxes
-boxplot(log(nhanes$bpb) ~ nhanes$AGE5b, col = 4, las = 1, ylab = "Log(blood lead level, ug/dL)", xlab = "Age category", cex.lab = 1.2)
-boxplot(log(nhanes$bpb) ~ nhanes$AGE5b, notch = T, col = "yellow", las = 1, ylab = "Log(blood lead level, ug/dL)", xlab = "Age category", cex.lab = 1.2)
-boxplot(log(nhanes$bpb) ~ nhanes$AGE5c, varwidth = T, col = "orange", las = 1, ylab = "Log(blood lead level, ug/dL)", xlab = "Age category", cex.lab = 1.2)
-## draw widths proportional to sqrt(No of obs) in the groups
-boxplot(log(nhanes$bpb) ~ nhanes$AGE5b, horizontal = T, col = "pink", las = 1, xlab = "Log (blood lead level, ug/dL)")
+# Make a simple barplot
+ggplot(nhanes_dataset,
+       aes(x = sex)) +
+  geom_bar()
 
-## group boxes by two variables
-boxplot(log(nhanes$bpb) ~ nhanes$sex1 * nhanes$AGE5b, las = 2, ylab = "Log(blood lead level, ug/dL)", col = c("dodgerblue", "darkorchid"), cex.lab = 1.3, cex.axis = 0.7)
-boxplot(log(nhanes$bpb) ~ nhanes$sex1 * nhanes$AGE5b, las = 2, ylab = "Log(blood lead level, ug/dL)", xlab="", col = c("dodgerblue", "darkorchid"), cex.lab = 1.3, xaxt = "n", ylim = c(-0.5, 4.5))
-axis(1, at = seq(1.5, 10, 2), labels = levels(AGE5b))
-title(xlab = "Age Category", cex.lab = 1.3)
-legend("topright", c("Male", "Female"), fill = c("dodgerblue", "darkorchid"), cex = 0.7, ncol = 2)
+# Add some colors
+ggplot(nhanes_dataset,
+       aes(x = sex,
+           fill = sex,
+           color = sex)) +
+  geom_bar()
+
+# Turn the plot horizontally
+ggplot(nhanes_dataset,
+       aes(x = sex,
+           fill = sex,
+           color = sex)) +
+  geom_bar() +
+  coord_flip()
+
+# Add labels
+ggplot(nhanes_dataset,
+       aes(x = sex,
+           fill = sex,
+           color = sex)) +
+  geom_bar() +
+  labs(title = "Barplot by sex",
+       x = "Sex",
+       y = "Number of Participants")
+
+# Manually set the colors
+ggplot(nhanes_dataset,
+       aes(x = sex,
+           fill = sex)) +
+  geom_bar() +
+  labs(title = "Barplot by sex",
+       x = "Sex",
+       y = "Number of Participants") +
+  scale_fill_manual(values=c("#999999", "#E69F00"))
 ```
 
-```{r violin_plot,eval=F}
-# violin plot
-vioplot(log(nhanes$bpb))
-vioplot(log(nhanes$bpb[nhanes$smk == 1]), log(nhanes$bpb[nhanes$smk == 2]), log(nhanes$bpb[nhanes$smk == 3]), col = "dodgerblue", names = c("Never", "Former", "Current"))
-title("Log(Blood Lead Level) by Smoking Status")
-```
+
+# Boxplot
 
 ```{r boxplot_ggplot2}
-# Boxplot, ggplot2 package
-ggplot(nhanes, aes(x = log(bpb))) + geom_boxplot(fill = "#990000",  color = "#3366FF", notch = T, notchwidth = .3)
 
-# boxplot split by another variable
-ggplot(nhanes, aes(x = AGE5b, y = log(bpb))) + geom_boxplot()
+# Boxplot
+ggplot(nhanes_dataset,
+       aes(x = log(LBXIRN))) +
+  geom_boxplot(fill = "#990000",
+               color = "#3366FF",
+               notch = T,
+               notchwidth = .3)
 
-# boxplot split by two variables
-ggplot(nhanes, aes(x = AGE5b, y = log(bpb))) + geom_boxplot(aes(fill = sex1)) + labs(title = "Boxplot of Blood Lead Levels") + scale_x_discrete("Age") + scale_y_continuous("Log(Blood lead levels)")
-```
+# Boxplot split by age groups
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXIRN))) +
+  geom_boxplot()
 
-########################################
-############ Exercise 5A ##############
-########################################
-
-```{r setup_data_for_forestplot}
-## Assuming that you obtained ORs for all and by gender and race.
-## Let's create a data frame for these ORs and 95% CIs.
-
-x.num <- c(1, 3, 4, 6, 7)
-x1 <- c("All", "Male", "Female", "White", "Black")
-or <- c(1.5, 1.1, 2.0, 1.4, 1.6)
-or.ll <- c(1.2, 0.9, 1.65, 0.95, 1.3)
-or.ul <- c(1.85, 1.35, 2.4, 2.05, 2.0)
-results <- data.frame(x.num, x1, or, or.ll, or.ul)
-```
-
-```{r forestplot_base_graphics}
-# Forest plot, base graphics
-plot(or, x.num, xlim = c(0, 2.5), ylim = c(0, 7), pch = 20, bty = "n", ylab = "", xaxt = "n", cex.lab = 1.5, cex = 3, col = "dodgerblue", yaxt = "n", xlab = "Odds Ratio")
-for (i in 1:5) {
-  lines(x = c(or.ll[i], or.ul[i]), y = c(x.num[i], x.num[i]), lwd = 2)
-}
-axis(1, cex.axis = 1.2)
-axis(2, at = x.num, labels = x1, las = 1, lwd = 0, cex.axis = 1.2, pos = .3) # pos is x-axis location of labels
-segments(1, 0, 1, 7.5, lty = 2)
-```
-
-```{r forest_plot_ggplot2}
-# Forest plot, ggplot2 package
-ggplot(results, aes(x = or, y = x1,  xmin = or.ll, xmax = or.ul)) + geom_pointrange() + xlab("Odds Ratio") + ylab("Group") + geom_vline(xintercept = 1, linetype = 2)  
+# Boxplot split by age and sex, with colors!
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXIRN))) +
+  geom_boxplot(aes(fill = sex)) +
+  labs(title = "Boxplot of Iron Levels") +
+  scale_x_discrete("Age") +
+  scale_y_continuous("Log(Iron levels)")
 ```
 
 
-```{r forestplot_package}
-# With forestplot package
-results <- structure(list(
-  mean = c(NA, or),
-  lower = c(NA, or.ll),
-  upper = c(NA, or.ul)
-),
-# .Names = c("mean", "lower", "upper")),
-row.names = x1,
-class = "data.frame"
-)
-tabletext <- cbind(c("Participant", x1), c("OR", or))
-forestplot(tabletext,
-  hrzl_lines = gpar(col = "#444444"),
-  results, new_page = TRUE,
-  is.summary = c(TRUE, rep(FALSE, 5)),
-  clip = c(0.1, 3),
-  xlog = FALSE,
-  col = fpColors(box = "royalblue", line = "darkblue", summary = "royalblue")
-)
-
-# add summary OR
-forestplot(tabletext,
-  results,
-  new_page = TRUE,
-  is.summary = c(TRUE, TRUE, rep(FALSE, 4)),
-  clip = c(0.1, 3),
-  xlog = FALSE,
-  col = fpColors(box = "royalblue", line = "darkblue", summary = "royalblue")
-)
-```
-
-```{r scatterplot_base}
-# Scatterplot, base graphics
-plot(nhanes$age, log(nhanes$bpb))
-plot(nhanes$age, log(nhanes$bpb), xlab = "Age", ylab = "Log(Blood lead, ug/dL)", las = 1, cex.lab = 1.2, cex=0.2)
-title("Scatterplot of Age vs. Blood Lead")
-abline(lm( log(nhanes$bpb) ~ nhanes$age), col = "firebrick1", lwd = 3)
-# identify(age,log(bpb))
-# Tool to location spots on the plot
-# locator()
-```
-
-```{r scatterplot_smoothing}
-## add a smoothing line
-plot(nhanes$age, log(nhanes$bpb), xlab = "Age", ylab = "Log(Blood lead, ug/dL)", las = 1, cex.lab = 1.2, pch = 20, cex = 0.6)
-title("Scatterplot of Age vs. Blood Lead")
-lines(smooth.spline(nhanes$age, log(nhanes$bpb), df = 10), col = "dodgerblue", lwd = 3)
-
-# plot(nhanes$age, nhanes$bmi, xlab = "Age", ylab = "Log(BMI)", las = 1, cex.lab = 1.2, pch = 20, cex = 0.6)
-# title("Scatterplot of Age vs. BMI")
-# lines(smooth.spline(nhanes$age, nhanes$bmi, df = 10), col = "dodgerblue", lwd = 3)
-# smooth.spline() errors out with missing data
-
-nomiss <- na.omit(data.frame(nhanes$age, nhanes$bmi)) # make an object without missing
-dim(nomiss)
-head(nomiss)
-plot(nomiss$nhanes.age, nomiss$nhanes.bmi, xlab = "Age", ylab = "BMI", las = 1, cex.lab = 1.2, pch = 20, cex = 0.6)
-title("Scatterplot of Age vs. BMI")
-lines(smooth.spline(nomiss$nhanes.age, nomiss$nhanes.bmi, df = 10), col = "dodgerblue", lwd = 3)
-
-# or restrict to nonmissing within the smooth.spline function
-plot(nhanes$age, nhanes$bmi, xlab = "Age", ylab = "BMI", las = 1, cex.lab = 1.2, pch = 20, cex = 0.6)
-title("Scatterplot of Age vs. BMI")
-lines(smooth.spline(nhanes$age[!is.na(nhanes$bmi)], na.omit(nhanes$bmi), df = 10), col = "dodgerblue", lwd = 3)
-```
-
-```{r scatterplot_by_group}
-## Scatterplots by group
-plot(nhanes$age, log(nhanes$bpb), xlab = "Age", ylab = "Log(Blood lead)", pch = nhanes$sex, col = c("seagreen", "darkorchid")[nhanes$sex], cex = 0.3, las = 1, cex.lab = 1.2)
-abline(lm(log(nhanes$bpb)[nhanes$sex == 1] ~ nhanes$age[nhanes$sex == 1]), lty = 1, lwd = 3, col = "seagreen")
-abline(lm(log(nhanes$bpb)[nhanes$sex == 2] ~ nhanes$age[nhanes$sex == 2]), lty = 2, lwd = 3, col = "darkorchid")
-legend("topleft", c("Male", "Female"), lty = c(1, 1), pch = c(1, 2), col = c("seagreen", "darkorchid"), bty="n")
-
-# dealing with dense data overplotting
-smoothScatter(nhanes$age, log(nhanes$bpb), ylab = "Log(Blood lead)", xlab = "Age", las = 1, cex.lab = 1.2)
-```
+# Scatter plot
 
 ```{r scatterplot_ggplot2}
-# Scatterplot, ggplot2 package
-ggplot(nhanes, aes(x = age, y = log(bpb))) + geom_point(shape = 1) # open circles
 
-## add a linear fit
-ggplot(nhanes, aes(x = age, y = log(bpb))) + geom_point() + geom_smooth(method = lm)
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point(shape = 1) # open circles
 
-## add a smoothing line
-ggplot(nhanes, aes(x = age, y = log(bpb))) + geom_point() + geom_smooth()
+# Add a linear fit
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point() +
+  geom_smooth(method = lm)
 
-# split by another variable
-ggplot(nhanes, aes(x = age, y = log(bpb), shape = sex1)) + geom_point(aes(color = sex1, shape = sex1), size = 0.8, alpha = 0.5) + geom_smooth(method = lm, aes(color = sex1))
-```
+# Add a smoothing line
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point() +
+  geom_smooth()
 
-```{r multiple_graphs_one_page_base}
-# multiple graphs on one page
-par(mfrow = c(1, 2)) # Here, make 1 row of graphs with 2 columns
-plot(nhanes$age, log(nhanes$bpb), pch = 20, cex = 0.2, ylab = "Log(Blood Lead Level)", las = 1, xlab = "Age")
-abline(lm(log(nhanes$bpb) ~ nhanes$age), col = "firebrick1", lwd = 2)
-boxplot(log(nhanes$bpb) ~ nhanes$AGE5b, notch = T, las = 2, ylab = "Log(Blood Lead Level)", pch = 20, cex = 0.5, xlab="Age")
-par(mfrow = c(1, 1)) # Go back to 1 row of graphs with 1 column of graphs
-## In traditional graphics, just do the graphs in order and they find their place
-```
-
-
-```{r multiple_plots_one_page_ggplot2}
-## In grid, we must instead save the plot to an object
-plot1 <- ggplot(nhanes, aes(x = sex1, fill = sex1, color = sex1)) + geom_bar()
-plot2 <- ggplot(nhanes, aes(x = sbp, ..density..)) + geom_histogram(fill = "lightgreen", color = "green", binwidth = 15) + geom_density()
-plot3 <- ggplot(nhanes, aes(x = AGE5b, y = log(bpb))) + geom_boxplot()
-plot4 <- ggplot(nhanes, aes(x = age, y = log(bpb))) + geom_point(size = 0.2, alpha = 0.5) + geom_smooth()
-
-## first clear the page with the grid.newpage() function.
-## This is an important step. Otherwise plots printed using
-## the following methods will appear on top of any previous plots.
-
-grid.newpage()
-
-## Next, use the pushViewport() function to define the various frames (viewports)
-## in the grid graphic system
-
-pushViewport(viewport(layout = grid.layout(2, 2)))
-
-## and then use the print function to print the objects into the viewport.
-
-print(plot1, vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
-print(plot2, vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
-print(plot3, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
-print(plot4, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
+# Split by another variable
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB),
+           shape = sex)) +
+  geom_point(aes(color = sex,
+                 shape = sex),
+             size = 1,
+             alpha = 0.5) +
+  geom_smooth(method = lm,
+              aes(color = sex)) +
+  labs(title = "Log(blood lead) by Age and Sex",
+       x = "Age (years)",
+       y = "log(blood lead)")
 ```
 
 
-```{r scatterplot_matrix_base_graphics}
-# Scatterplot matrix, base graphics
+# Violin plot
 
-# pairs function, basic
-pairs(cbind(nhanes$sbp, nhanes$bpb, nhanes$bmi, nhanes$age), pch = 20, cex = 0.4, col = "dodgerblue")
+```{r violin_plot,eval=F}
 
-# Set up the function for the correlation coefficient text for the upper cells
-panel.cor <- function(x, y, digits = 2, prefix = "r=", cex.cor, ...) {
-  usr <- par("usr")
-  on.exit(par(usr))
-  par(usr = c(0, 1, 0, 1))
-  r <- abs(cor(x, y, use = "pairwise.complete.obs"))
-  txt <- format(c(r, 0.123456789), digits = digits)[1]
-  txt <- paste0(prefix, txt)
-  if (missing(cex.cor)) cex.cor <- 0.8 / strwidth(txt)
-  text(0.5, 0.5, txt, cex = 2)
-}
+# Basic violin plot
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXBPB))) + 
+  geom_violin()
 
-# Set up the function for the histograms for the middle cells
-panel.hist <- function(x, ...) {
-  usr <- par("usr")
-  on.exit(par(usr))
-  par(usr = c(usr[1:2], 0, 1.5))
-  h <- hist(x, plot = FALSE)
-  breaks <- h$breaks
-  nB <- length(breaks)
-  y <- h$counts
-  y <- y / max(y)
-  rect(breaks[-nB], 0, breaks[-1], y, ...)
-}
+# Add data points on top
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXBPB))) + 
+  geom_violin() +
+  geom_jitter(shape = 16, #circle
+              position = position_jitter(0.2),
+              alpha = 0.25)
 
-# Put it all together
-pairs(cbind(nhanes$sbp, nhanes$bpb, nhanes$bmi, nhanes$age), main = "Pairwise Relationships", pch = 20, cex = 0.4, font.labels = 2, cex.labels = 2, col = "dodgerblue", upper.panel = panel.cor, diag.panel = panel.hist, lower.panel = panel.smooth, labels=c("sbp", "bpb", "bmi", "age"))
+# Add colors
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXBPB),
+           fill = cut_groups)) + 
+  geom_violin() +
+  geom_jitter(shape = 16, #circle
+              position = position_jitter(0.2),
+              alpha = 0.25) +
+  scale_fill_brewer(palette = "Blues") +
+  labs(title = "Violin plots by age group",
+       x = "Age Group (years)",
+       y = "Log(Blood Lead) (ug/dL)")
 ```
 
-```{r scatterplot_matrix_ggplot2}
-# Scatterplot matrix, ggplot2 package
-ggpairs(nhanes[, c("sbp", "dbp", "bmi", "bpb")])
+
+# Exercise 5A
+
+
+# Long dataset for facet plots
+
+```{r}
+
+# Remove value of 400 from LBXWBCSI: 
+
+
+# Make a long dataset from nhanes_dataset
+# Select the columns you want to keep, make long dataset, log transform measurements
+long_nhanes <- nhanes_dataset %>%
+  select(SEQN,
+         RIDAGEYR,
+         LBXWBCSI,
+         LBXWBCSI,
+         LBXRBCSI,
+         LBDLYMNO,
+         LBXCOT) %>%
+  pivot_longer(cols = c(LBXWBCSI,
+                        LBXRBCSI,
+                        LBDLYMNO),
+               names_to = "cell_type",
+               values_to = "measurement")
+
+# How many columns do you expect?
+
 ```
 
-#########################################
-############ Exercise 5B ##############
-#########################################
+
+
+# Facet plot
+
+```{r facet_wrap}
+
+# Make a facet plot of cotinine concentrations vs different immune measures
+ggplot(long_nhanes,
+       aes(x = LBXCOT,
+           y = measurement)) +
+  geom_point()+
+  facet_wrap(vars(cell_type),
+               ncol = 1,
+               scales = "free")
+
+# Notice the point at 400 in the white blood cell plot: 400 is the upper limit of detection so the actual number may be much higher therefore we should drop this value
+# Also notice that the scale makes it difficult to see detail of values: log transform axis
+
+# Drop value 400 and any missing values from measurement
+long_nhanes_clean <- long_nhanes %>%
+  filter(!measurement >= 400)
+
+# Remake the facet plot of cotinine concentrations vs different immune measures
+# Using a log transformed axis does not change the data values
+ggplot(long_nhanes_clean,
+       aes(x = LBXCOT,
+           y = measurement)) +
+  geom_point() +
+  scale_y_log10() +
+  geom_smooth(method = "lm") +
+  facet_wrap(vars(cell_type),
+               ncol = 1,          #this will stack all the plots vertically
+               scales = "free") + #this allows the axes ranges to be different
+  labs(x = "Cotinine (ng/mL)")
+
+# Interpretation?
+```
+
+# Combine multiple types of plots on one page
+
+```{r}
+
+# Save plots from earlier as objects
+viol_plot <- ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXBPB),
+           fill = cut_groups)) + 
+  geom_violin() +
+  geom_jitter(shape = 16, #circle
+              position = position_jitter(0.2),
+              alpha = 0.25) +
+  scale_fill_brewer(palette = "Blues") +
+  labs(title = "Violin plots by age group",
+       x = "Age Group (years)",
+       y = "log(blood lead) (ug/dL)")
+
+scatter_plot <- ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB),
+           shape = sex)) +
+  geom_point(aes(color = sex,
+                 shape = sex),
+             size = 1,
+             alpha = 0.5) +
+  geom_smooth(method = lm,
+              aes(color = sex)) +
+  labs(title = "Log(blood lead) by age and sex",
+       x = "Age (years)",
+       y = "log(blood lead)")
+
+bar_plot <- ggplot(nhanes_dataset,
+       aes(x = sex,
+           fill = sex)) +
+  geom_bar() +
+  labs(title = "Barplot by sex",
+       x = "Sex",
+       y = "Number of Participants") +
+  scale_fill_manual(values=c("#999999", "#E69F00"))
+
+facet_plot <- ggplot(long_nhanes_clean,
+       aes(x = LBXCOT,
+           y = measurement)) +
+  geom_point() +
+  scale_y_log10() +
+  geom_smooth(method = "lm") +
+  facet_wrap(vars(cell_type),
+               ncol = 1,
+               scales = "free") +
+  labs(x = "Cotinine (ng/mL)",
+       title = "Immune measures by cotinine (ng/mL)")
 
 
 
+# View the four plots on one page
+ggarrange(bar_plot, viol_plot, scatter_plot, facet_plot,
+          ncol = 2,
+          nrow = 2,
+          labels = LETTERS[1:4]) #add letters A-D as figure labels
+
+
+
+# Save the compiled plots
+compiled_plots <- ggarrange(bar_plot, viol_plot, scatter_plot, facet_plot,
+                            ncol = 2,
+                            nrow = 2,
+                            labels = LETTERS[1:4])
+
+# Save the plot as a pdf for viewing at a high resolution
+ggsave(filename = here("compiled_nhanes_plots.pdf"),
+       plot = compiled_plots,
+       width = 14,
+       height = 9)
+
+# Save the plot as a png for presentation
+ggsave(filename = here("compiled_nhanes_plots.png"),
+       plot = compiled_plots,
+       units = "in",
+       width = 14,
+       height = 9,
+       dpi = 300)
+```
+
+
+# Exercise 5B
