@@ -1,0 +1,422 @@
+---
+title: "Check Your Understanding"
+output: html_document
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# check your understanding
+```{r}
+ggplot(nhanes_dataset, 
+       aes(x = LBXCOT, 
+           y = LBXBCD)) + 		
+		geom_point(color = "magenta",
+		           size = 0.4,
+		           alpha = 0.5) +
+    labs(x="Serum Cotinine in ng/mL",
+         y="Blood Cadmium in ug/dL")
+```
+
+
+# Base R Plotting
+
+```{r base_R_plots}
+
+# Base R plotting functions are good for a quick look at the data
+# They can be customized, but ggplot() is much better for this and is part of tidyverse
+
+# Histogram of iron concentrations and red blood cell counts
+hist(nhanes_dataset$LBXIRN)
+hist(nhanes_dataset$LBXRBCSI)
+
+# Scatterplot of red blood cell counts by iron concentrations
+plot(nhanes_dataset$LBXIRN, nhanes_dataset$LBXRBCSI)
+
+# If you want your plot to appear in a separate window
+# quartz() #mac only
+# x11() #pc or mac (kind of slow)
+
+# If you want to save your plot directly to file, use pdf(), png(), jpg(), etc. Close the plotting with dev.off()
+pdf(file = here("RBC_Fe_plot.pdf"))
+plot(nhanes_dataset$LBXIRN, nhanes_dataset$LBXRBCSI)
+dev.off()
+```
+
+
+```{r}
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr)) + 			
+		geom_point() + geom_smooth() + xlab("age")
+
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr)) + 			
+		geom_point()  + xlab("age")
+
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr)) + 			
+		geom_point(size = 10 , shape = 22 , color = "seagreen", fill = "violet", alpha = 1/3)  + xlab("age")
+
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr)) + 			
+		geom_point()  + xlab("age") + theme_classic()
+
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr, color = iron_status)) + 			
+		geom_point()  + xlab("age")
+
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr, color = sex)) + 			
+		geom_point()  + xlab("age")
+
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = LBXCOT)) + 		
+		geom_point() + geom_smooth()
+
+
+ggplot(nhanes_dataset, aes(x = LBXIRN, y = LBXBCD)) + 		
+		geom_point() + geom_smooth()
+
+nhanes_dataset %>%
+  
+  cor.test(nhanes_dataset$LBXIRN, nhanes_dataset$LBXBCD)
+
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = log(LBXBPB))) + 
+		geom_point() + geom_smooth()
+
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = log(LBXBCD))) + 
+		geom_point() + geom_smooth()
+
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = LBXIRN)) + 		
+		geom_point() + geom_smooth()
+
+
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = LBDNENO)) + 		
+		geom_point() + geom_smooth()
+
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = LBDNENO)) + 		
+		geom_point() + geom_smooth()
+
+ggplot(nhanes_dataset, aes(x = LBXCOT, y = LBXBCD)) + 		
+		geom_point() + geom_smooth() + xlim(0, 500) 
+
+ggplot(nhanes_dataset, aes(x = LBXCOT, y = LBXBCD)) + 		
+		geom_point() + xlim(0, 500) 
+```
+# Bar
+```{r}
+
+
+
+ggplot(nhanes_dataset,
+       aes(x = sex,
+           fill = sex)) +
+  geom_bar() +
+  labs(title = "Barplot by sex",
+       x = "Sex",
+       y = "Number of Participants") +
+  scale_fill_manual(values=c("#999999", "#E69F00"))
+
+
+table(nhanes_dataset$education)
+nhanes_dataset %>%
+  drop_na(education) %>%
+ggplot(
+       aes(x = education,
+           fill = education)) +
+  geom_bar(show.legend = FALSE) +
+  labs(x = "Educational Attainment",
+       y = "Number of Participants") +
+  scale_fill_brewer() +
+  coord_flip()
+
+nhanes_dataset %>%
+  drop_na(education) %>%
+ggplot(
+       aes(x = education,
+           fill = education)) +
+  geom_bar(show.legend = FALSE) +
+  labs(x = "Educational Attainment",
+       y = "Number of Participants") +
+  coord_flip()
+```
+
+# Hist density
+```{r}
+ggplot(nhanes_dataset,
+       aes(x = LBXRBCSI)) +
+  geom_histogram(binwidth = 0.25, fill="dodgerblue", color="black") +
+  labs(x = "Red blood cell count (million cells/uL)")
+
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR)) +
+  geom_histogram(fill="dodgerblue", color="black") +
+  labs(x = "Age in years")
+
+
+# Add density plot
+ggplot(nhanes_dataset,
+       aes(x = LBXRBCSI, ..density..)) +
+  geom_histogram(fill = "lightgreen",
+                 color = "green",
+                 binwidth = 0.25) +
+  geom_density()
+
+
+# Add density plot
+ggplot(nhanes_dataset,
+       aes(x = LBXRBCSI, ..density..)) +
+  geom_density(size=2)
+ +
+  labs(x = "Red blood cell count (million cells/uL)")
+
+ggplot(nhanes_dataset,
+       aes(x = LBXRBCSI)) +
+  geom_density(size=2, color="dodgerblue") +
+  labs(x = "Red blood cell count (million cells/uL)")
+```
+
+
+# Scatter plot
+```{r}
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point(alpha = 0.1, size = 0.5) +
+  geom_smooth(method = lm, se=T, fill="red", alpha=1, size = 0, level = .999)
+
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point(alpha = 0.1, size = 0.5) + 
+  labs(x= "Age in years", y="log 10 (Blod Pb in ug/dL)")
+
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_smooth(method = lm, se=T, fill="red", level = 0.999) + 
+  labs(x= "Age in years", y="log 10 (Blod Pb in ug/dL)")
+```
+
+# Boxplot
+
+```{r}
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXIRN))) +
+  geom_boxplot(fill = "darkorchid") +
+  labs(x = "Age Groups", y = "ln(Blood Iron in ug/dL)")
+
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXIRN))) +
+  geom_violin(fill = "darkorchid") +
+  labs(x = "Age Groups", y = "ln(Blood Iron in ug/dL)")
+
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXBPB))) + 
+  geom_violin(draw_quantiles = c(0,0.25, 0.5, 0.75, 1), fill = "darkorchid", alpha=0.5)+
+  labs(x = "Age Groups", y = "ln(Blood Iron in ug/dL)")
+
+
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXBPB))) + 
+  geom_violin(draw_quantiles =,  fill = "darkorchid", alpha=0.5)+
+  labs(x = "Age Groups", y = "ln(Blood Iron in ug/dL)")
+
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXBPB))) + 
+  geom_violin(fill = "darkorchid", alpha=0.5)+
+  labs(x = "Age Groups", y = "ln(Blood Iron in ug/dL)")  + 
+  geom_jitter(shape = 16, #circle
+              position = position_jitter(0.2),
+              alpha = 0.25,
+              size = 0.75)
+```
+```{r}
+str(viol_plot)
+class(viol_plot)
+
+plot_object <- 
+  ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr)) + 			
+		geom_point()
+class(plot_object)
+str(plot_object)
+rm(obj)
+```
+
+
+```{r facet_wrap}
+
+# Make a facet plot of cotinine concentrations vs different immune measures
+ggplot(long_nhanes,
+       aes(x = LBXCOT,
+           y = measurement)) +
+  geom_point()+
+  facet_wrap(vars(cell_type),
+               ncol = 1,
+               scales = "free")
+
+# Notice the point at 400 in the white blood cell plot: 400 is the upper limit of detection so the actual number may be much higher therefore we should drop this value
+# Also notice that the scale makes it difficult to see detail of values: log transform axis
+
+# Drop value 400 and any missing values from measurement
+long_nhanes_clean <- long_nhanes %>%
+  filter(!measurement >= 400)
+
+# Remake the facet plot of cotinine concentrations vs different immune measures
+# Using a log transformed axis does not change the data values
+ggplot(long_nhanes_clean,
+       aes(x = LBXCOT,
+           y = measurement)) +
+  geom_point() +
+  scale_y_log10() +
+  geom_smooth(method = "lm") +
+  facet_wrap(vars(cell_type),
+               ncol = 1,          #this will stack all the plots vertically
+               scales = "free") + #this allows the axes ranges to be different
+  labs(x = "Cotinine (ng/mL)")
+
+# Interpretation?
+
+
+ggplot(nhanes_dataset,
+       aes(x=LBXCOT)) + 
+  geom_histogram() +
+  facet_wrap(vars(sex))
+
+
+ggplot(nhanes_dataset,
+       aes(x=LBXBPB)) + 
+  geom_histogram(binwidth = .5) +
+  facet_wrap(vars(sex), ncol=1)
+
+ggplot(nhanes_dataset,
+       aes(x=LBXBPB)) + 
+  geom_histogram(binwidth = .5) +
+  facet_wrap(vars(race_eth))
+
+
+ggplot(nhanes_dataset,
+       aes(x=LBXBPB)) + 
+  geom_histogram(binwidth = .5) +
+  facet_wrap(vars(education))
+
+
+ggplot(nhanes_dataset,
+       aes(y=log10(LBXBPB), x= RIDAGEYR, color=sex)) + 
+  geom_point(alpha=0.1) + geom_smooth() + 
+  facet_wrap(vars(sex), ncol=1) + 
+  labs(x="Age in years", y= "log10(Blood Pb in ug/dL)", color = "Sex")
+
+
+ggplot(nhanes_dataset,
+       aes(y=log10(LBXBPB), x= RIDAGEYR, color=sex)) + 
+  geom_point(alpha=0.1) + geom_smooth() + 
+  facet_wrap(vars(race_eth), ncol=1) + 
+  labs(x="Age in years", y= "log10(Blood Pb in ug/dL)", color = "Race/Ethnicity")
+
+
+nhanes_dataset %>%
+  drop_na(education) %>%
+ggplot(
+       aes(y=log10(LBXBPB), x= RIDAGEYR, color=education)) + 
+  geom_point(alpha=0.1) + geom_smooth() + 
+  facet_wrap(vars(education), ncol=1) + 
+  labs(x="Age in years", y= "log10(Blood Pb in ug/dL)", color = "Educational Attainment")
+
+
+nhanes_dataset %>%
+  drop_na(education) %>%
+ggplot(
+       aes(x= RIDAGEYR, fill=education)) + 
+  geom_histogram(binwidth = 2, color="black") +
+  facet_wrap(vars(education), ncol=1) + 
+  labs(x="Age in years", y= "Count", color = "Educational Attainment")
+
+nhanes_dataset %>%
+  drop_na(education) %>%
+ggplot(
+       aes(x= RIDAGEYR, color=education)) + 
+  geom_density() +
+  facet_wrap(vars(education), ncol=1) + 
+  labs(x="Age in years", y= "Count", color = "Educational Attainment")
+```
+
+
+
+```{r}
+# Save plots from earlier as objects
+viol_plot <- ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXBPB),
+           fill = cut_groups)) + 
+  geom_violin() +
+  geom_jitter(shape = 16, #circle
+              position = position_jitter(0.2),
+              alpha = 0.25) +
+  scale_fill_brewer(palette = "Blues") +
+  labs(title = "Violin plots by age group",
+       x = "Age Group (years)",
+       y = "log(blood lead) (ug/dL)")
+
+scatter_plot <- ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB),
+           shape = sex)) +
+  geom_point(aes(color = sex,
+                 shape = sex),
+             size = 1,
+             alpha = 0.5) +
+  geom_smooth(method = lm,
+              aes(color = sex)) +
+  labs(title = "Log(blood lead) by age and sex",
+       x = "Age (years)",
+       y = "log(blood lead)")
+
+bar_plot <- ggplot(nhanes_dataset,
+       aes(x = sex,
+           fill = sex)) +
+  geom_bar() +
+  labs(title = "Barplot by sex",
+       x = "Sex",
+       y = "Number of Participants") +
+  scale_fill_manual(values=c("#999999", "#E69F00"))
+
+histogram <- ggplot(nhanes_dataset,
+       aes(x = LBXCOT)) +
+  geom_histogram() +
+  labs(x = "Cotinine (ng/mL)")
+
+
+library(ggpubr)
+# View the four plots on one page
+ggarrange(bar_plot, viol_plot, scatter_plot, histogram,
+          ncol = 2,
+          nrow = 2,
+          labels = LETTERS[1:4]) #add letters A-D as figure labels
+
+
+```
+
+
+
+```{r}
+install.packages("corrplot")
+library(corrplot)
+library(tidyverse)
+
+nhanes_dataset %>%
+  select(RIDAGEYR,
+         LBXBCD,
+         LBXBPB,
+         LBXRBCSI,
+         LBXWBCSI,
+         LBXIRN,
+         LBXCOT,
+         nlr
+  ) %>%
+  cor(use="pairwise.complete.obs") %>%
+corrplot(method="ellipse")
+
+```
+

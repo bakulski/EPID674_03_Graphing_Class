@@ -1,0 +1,527 @@
+---
+---
+title: "EPID674 Epidemiologic Data Analysis using R"
+author: "Kelly Bakulski and Lauren Middleton"
+date: "Last compiled on `r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  word_document:
+    toc: yes
+  html_document:
+    toc: yes
+    toc_float: yes
+subtitle: Graphing in R
+---
+
+# Set up options
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Install new packages
+```{r install_packages, eval=FALSE, include=FALSE}
+
+# Install packages. Do this only once.
+options(repos="https://cran.rstudio.com" )
+install.packages("tidyverse")
+install.packages("here")
+install.packages("ggpubr")
+
+# To avoid installing every time you knit: keep curly brackets eval=FALSE
+```
+
+
+# Load packages
+```{r load_packages, include=FALSE}
+
+##### Load these packages for the current session, do this every time
+library(tidyverse)
+library(here)
+library(ggpubr)
+```
+
+
+# Load data
+```{r read_data}
+
+# Check the file path
+here("nhanes_dataset.rda")
+# Load the saved R data
+load(here("nhanes_dataset.rda"))
+```
+
+
+# Useful websites for ggplot information:
+* Online introduction book: **https://ggplot2-book.org/index.html**
+* For theory: **https://rkabacoff.github.io/datavis/**
+* How to code: **http://www.sthda.com/english/wiki/ggplot2-essentials**
+
+# Introduction to ggplot
+
+```{r introduction_ggplot}
+
+# Specify the dataset, variables on the x-axis, y-axis
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point() 
+
+# Update axes labels
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point() + 
+  labs(x = "Age in years", 
+       y = "log10(blood Pb in ug/dL")
+
+# Change point size, transparency, shape 
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point(size = 0.3, 
+             alpha = 0.2, 
+             shape = 2) + 
+  labs(x = "Age in years", 
+       y = "log10(blood Pb in ug/dL")
+
+# Add color variable
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB),
+           color = sex)) +
+  geom_point(size = 0.4, 
+             alpha = 0.2,
+             shape = 2) + 
+  labs(x = "Age in years", 
+       y = "log10(blood Pb in ug/dL",
+       color = "Sex")
+
+# Change theme
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB),
+           color = sex)) +
+  geom_point(size = 0.4, 
+             alpha = 0.2,
+             shape = 2) + 
+  labs(x = "Age in years", 
+       y = "log10(blood Pb in ug/dL",
+       color = "Sex") + 
+  theme_classic()
+
+
+```
+
+
+
+# Make a barplot: Categorical data
+
+```{r barplot_ggplot2_package}
+
+# Make a simple barplot
+ggplot(nhanes_dataset,
+       aes(x = sex)) +
+  geom_bar()
+
+# Add some colors
+ggplot(nhanes_dataset,
+       aes(x = sex,
+           fill = sex,
+           color = sex)) +
+  geom_bar()
+
+# Turn the plot horizontally
+ggplot(nhanes_dataset,
+       aes(x = sex,
+           fill = sex,
+           color = sex)) +
+  geom_bar() +
+  coord_flip()
+
+# Add labels
+ggplot(nhanes_dataset,
+       aes(x = sex,
+           fill = sex,
+           color = sex)) +
+  geom_bar() +
+  labs(title = "Barplot by sex",
+       x = "Sex",
+       y = "Number of Participants")
+
+# Manually set the colors
+ggplot(nhanes_dataset,
+       aes(x = sex,
+           fill = sex)) +
+  geom_bar() +
+  labs(title = "Barplot by sex",
+       x = "Sex",
+       y = "Number of Participants") +
+  scale_fill_manual(values=c("#999999", "#E69F00"))
+```
+
+# Histogram: Numeric data
+
+```{r histogram_ggplot2}
+
+# Histogram, ggplot2 package
+ggplot(nhanes_dataset,
+       aes(x = LBXRBCSI)) +
+  geom_histogram()
+
+ggplot(nhanes_dataset,
+       aes(x = LBXRBCSI)) +
+  geom_histogram(binwidth = 0.25)
+
+# Add density plot
+ggplot(nhanes_dataset,
+       aes(x = LBXRBCSI, ..density..)) +
+  geom_histogram(fill = "lightgreen",
+                 color = "green",
+                 binwidth = 0.25) +
+  geom_density()
+
+
+# Stratified histograms in separate plots
+ggplot(nhanes_dataset,
+       aes(x = LBXIRN,
+           fill = sex)) +
+  geom_histogram() +
+  facet_grid(. ~ sex)
+
+# Overlapping histograms
+ggplot(nhanes_dataset,
+       aes(x = LBXIRN,
+           fill = sex)) + #stratify by sex
+  geom_histogram(binwidth = 10,
+                 position = "identity")
+
+# Make a black and white plot with transparency
+ggplot(nhanes_dataset,
+       aes(x = LBXIRN,
+           fill = sex)) +
+  geom_histogram(binwidth = 10,
+                 position = "identity",
+                 alpha = 0.8) + #transparency
+  scale_fill_grey(start = 0,
+                  end = 0.75)
+```
+
+
+
+# Boxplot
+
+```{r boxplot_ggplot2}
+
+# Boxplot
+ggplot(nhanes_dataset,
+       aes(x = log(LBXIRN))) +
+  geom_boxplot(fill = "#990000",
+               color = "#3366FF",
+               notch = T,
+               notchwidth = .3)
+
+# Boxplot split by age groups
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXIRN))) +
+  geom_boxplot()
+
+# Boxplot split by age and sex, with colors!
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXIRN))) +
+  geom_boxplot(aes(fill = sex)) +
+  labs(title = "Boxplot of Iron Levels") +
+  scale_x_discrete("Age") +
+  scale_y_continuous("Log(Iron levels)")
+```
+
+
+# Scatter plot
+
+```{r scatterplot_ggplot2}
+
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point(shape = 1) # open circles
+
+# Add a linear fit
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point() +
+  geom_smooth(method = lm)
+
+# Add a smoothing line
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point() +
+  geom_smooth()
+
+# Split by another variable
+ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB),
+           shape = sex)) +
+  geom_point(aes(color = sex,
+                 shape = sex),
+             size = 1,
+             alpha = 0.5) +
+  geom_smooth(method = lm,
+              aes(color = sex)) +
+  labs(title = "Log(blood lead) by Age and Sex",
+       x = "Age (years)",
+       y = "log(blood lead)")
+```
+
+
+# Violin plot
+
+```{r violin_plot,eval=F}
+
+# Basic violin plot
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXBPB))) + 
+  geom_violin()
+
+# Add data points on top
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXBPB))) + 
+  geom_violin() +
+  geom_jitter(shape = 16, #circle
+              position = position_jitter(0.2),
+              alpha = 0.25)
+
+# Add colors
+ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXBPB),
+           fill = cut_groups)) + 
+  geom_violin() +
+  geom_jitter(shape = 16, #circle
+              position = position_jitter(0.2),
+              alpha = 0.25) +
+  scale_fill_brewer(palette = "Blues") +
+  labs(title = "Violin plots by age group",
+       x = "Age Group (years)",
+       y = "Log(Blood Lead) (ug/dL)")
+```
+
+
+# Save ggplot figures
+
+```{r}
+
+# Recommended to save figures as both pdf for high-quality viewing and png for presentations
+
+# Update the text size for saving in larger dimensions
+# Finding the right text size is trial and error until it looks good!
+histogram_nhanes_sex <- ggplot(nhanes_dataset,
+                             aes(x = LBXIRN,
+                                 fill = sex)) +
+  geom_histogram(binwidth = 10,
+                 position = "identity") +
+  labs(x = "Iron (ug/dL)") +
+  theme(axis.text = element_text(color = "black", #change the color and text size of labels
+                                   size = 20),
+        axis.title = element_text(size = 25),   #change the text size of axis titles
+        title = element_text(size = 30)) +      #change the text size of plot title
+  theme(legend.title = element_text(size = 25), #change the text size of legend title
+        legend.text = element_text(size = 20))  #change the text size of legend labels
+
+
+# Save the plot as a pdf for viewing at a high resolution
+ggsave(filename = ("histogram_by_sex.pdf"),
+       plot = histogram_nhanes_sex,
+       width = 14,
+       height = 9)
+
+# Save the plot as a png for presentation
+ggsave(filename = here("histogram_by_sex.png"),
+       plot = histogram_nhanes_sex,
+       units = "in",
+       width = 14,
+       height = 9,
+       dpi = 300)
+```
+
+
+# Long dataset for facet plots
+
+```{r}
+
+# Remove value of 400 from LBXWBCSI: 
+
+
+# Make a long dataset from nhanes_dataset
+# Select the columns you want to keep, make long dataset, log transform measurements
+long_nhanes <- nhanes_dataset %>%
+  select(SEQN,
+         RIDAGEYR,
+         LBXWBCSI,
+         LBXRBCSI,
+         LBDLYMNO,
+         LBXCOT) %>%
+  pivot_longer(cols = c(LBXWBCSI,
+                        LBXRBCSI,
+                        LBDLYMNO),
+               names_to = "cell_type",
+               values_to = "measurement")
+
+# How many columns do you expect?
+
+```
+
+
+
+# Facet plot
+
+```{r facet_wrap}
+
+# Make a facet plot of cotinine concentrations vs different immune measures
+ggplot(long_nhanes,
+       aes(x = LBXCOT,
+           y = measurement)) +
+  geom_point()+
+  facet_wrap(vars(cell_type),
+               ncol = 1,
+               scales = "free")
+
+# Notice the point at 400 in the white blood cell plot: 400 is the upper limit of detection so the actual number may be much higher therefore we should drop this value
+# Also notice that the scale makes it difficult to see detail of values: log transform axis
+
+# Drop value 400 and any missing values from measurement
+long_nhanes_clean <- long_nhanes %>%
+  filter(!measurement >= 400)
+
+# Remake the facet plot of cotinine concentrations vs different immune measures
+# Using a log transformed axis does not change the data values
+ggplot(long_nhanes_clean,
+       aes(x = LBXCOT,
+           y = measurement)) +
+  geom_point() +
+  scale_y_log10() +
+  geom_smooth(method = "lm") +
+  facet_wrap(vars(cell_type),
+               ncol = 1,          #this will stack all the plots vertically
+               scales = "free") + #this allows the axes ranges to be different
+  labs(x = "Cotinine (ng/mL)")
+
+# Interpretation?
+```
+
+
+# Combine multiple types of plots on one page
+
+```{r multipaneled_plots}
+
+# Save plots from earlier as objects
+viol_plot <- ggplot(nhanes_dataset,
+       aes(x = cut_groups,
+           y = log(LBXBPB),
+           fill = cut_groups)) + 
+  geom_violin() +
+  geom_jitter(shape = 16, #circle
+              position = position_jitter(0.2),
+              alpha = 0.25) +
+  scale_fill_brewer(palette = "Blues") +
+  labs(title = "Violin plots by age group",
+       x = "Age Group (years)",
+       y = "log(blood lead) (ug/dL)")
+
+scatter_plot <- ggplot(nhanes_dataset,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB),
+           shape = sex)) +
+  geom_point(aes(color = sex,
+                 shape = sex),
+             size = 1,
+             alpha = 0.5) +
+  geom_smooth(method = lm,
+              aes(color = sex)) +
+  labs(title = "Log(blood lead) by age and sex",
+       x = "Age (years)",
+       y = "log(blood lead)")
+
+bar_plot <- ggplot(nhanes_dataset,
+       aes(x = sex,
+           fill = sex)) +
+  geom_bar() +
+  labs(title = "Barplot by sex",
+       x = "Sex",
+       y = "Number of Participants") +
+  scale_fill_manual(values=c("#999999", "#E69F00"))
+
+facet_plot <- ggplot(long_nhanes_clean,
+       aes(x = LBXCOT,
+           y = measurement)) +
+  geom_point() +
+  scale_y_log10() +
+  geom_smooth(method = "lm") +
+  facet_wrap(vars(cell_type),
+               ncol = 1,
+               scales = "free") +
+  labs(x = "Cotinine (ng/mL)",
+       title = "Immune measures by cotinine (ng/mL)")
+
+
+
+# View the four plots on one page
+ggarrange(bar_plot, viol_plot, scatter_plot, facet_plot,
+          ncol = 2,
+          nrow = 2,
+          labels = LETTERS[1:4]) #add letters A-D as figure labels
+
+
+
+# Save the compiled plots
+compiled_plots <- ggarrange(bar_plot, viol_plot, scatter_plot, facet_plot,
+                            ncol = 2,
+                            nrow = 2,
+                            labels = LETTERS[1:4])
+
+# Save the plot as a pdf for viewing at a high resolution
+ggsave(filename = here("compiled_nhanes_plots.pdf"),
+       plot = compiled_plots,
+       width = 14,
+       height = 9)
+
+# Save the plot as a png for presentation
+ggsave(filename = here("compiled_nhanes_plots.png"),
+       plot = compiled_plots,
+       units = "in",
+       width = 14,
+       height = 9,
+       dpi = 300)
+```
+
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
