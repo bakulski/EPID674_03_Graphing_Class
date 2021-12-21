@@ -59,13 +59,15 @@ load(here("nhanes_dataset.rda"))
 # Introduction to ggplot
 
 ```{r introduction_ggplot}
-
 # Specify the dataset, variables on the x-axis, y-axis
 ggplot(nhanes_dataset,
        aes(x = RIDAGEYR,
            y = log10(LBXBPB))) +
-  geom_point() 
+  geom_point()
+```
 
+
+```{r customize_ggplot}
 # Update axes labels
 ggplot(nhanes_dataset,
        aes(x = RIDAGEYR,

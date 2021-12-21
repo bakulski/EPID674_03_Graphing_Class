@@ -46,6 +46,29 @@ plot(nhanes_dataset$LBXIRN, nhanes_dataset$LBXRBCSI)
 dev.off()
 ```
 
+```{r}
+ggplot(nhanes_homework,
+       aes(x = MCI,
+           fill = sex)) +
+  geom_bar() +
+  labs(title = "Barplot by sex and cognition",
+       x = "Cognitive impairment status",
+       y = "Number of Participants",
+       fill = "Sex of participant")
+
+
+ggplot(nhanes_homework,
+       aes(x = MCI,
+           fill = sex)) +
+  geom_bar() +
+  labs(title = "Barplot by sex and cognitive status",
+       x = "Cognitive impairment status",
+       y = "Number of Participants",
+       fill = "Sex of participant") + 
+  scale_fill_brewer()
+```
+
+
 
 ```{r}
 ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr)) + 			
@@ -55,7 +78,7 @@ ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr)) +
 		geom_point()  + xlab("age")
 
 ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr)) + 			
-		geom_point(size = 10 , shape = 22 , color = "seagreen", fill = "violet", alpha = 1/3)  + xlab("age")
+		geom_point(size = 10 , shape = 22 , color = "seagreen", fill = "violet", alpha = 1/3)  + xlab("age") + xlim(0,10) + theme_classic()
 
 ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr)) + 			
 		geom_point()  + xlab("age") + theme_classic()
@@ -63,7 +86,22 @@ ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr)) +
 ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr, color = iron_status)) + 			
 		geom_point()  + xlab("age")
 
-ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr, color = sex)) + 			
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr, color = sex)) + 	
+		geom_point()  + labs(x = "Age in years", 
+		                     y = "Neutrophil/lymphocyte ratio",
+		                     title = "Age versus blood cell ratio",
+		                     color = "Sex of participant")
+
+
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr, color = sex)) + 	
+		geom_point()  + labs(x = "Age in years", 
+		                     y = "Neutrophil/lymphocyte ratio",
+		                     title = "Age versus blood cell ratio",
+		                     color = "Sex of participant") + 
+  xlim(0, 10) + ylim(0,15)
+
+
+ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = nlr, color = sex)) + 	
 		geom_point()  + xlab("age")
 
 ggplot(nhanes_dataset, aes(x = RIDAGEYR, y = LBXCOT)) + 		
