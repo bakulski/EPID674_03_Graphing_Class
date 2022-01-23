@@ -45,9 +45,9 @@ library(RColorBrewer)
 ```{r read_data}
 
 # Check the file path
-here("nhanes_dataset.rda")
+here("nhanes_class_dataset.rda")
 # Load the saved R data
-load(here("nhanes_dataset.rda"))
+load(here("nhanes_class_dataset.rda"))
 ```
 
 
@@ -60,7 +60,7 @@ load(here("nhanes_dataset.rda"))
 
 ```{r introduction_ggplot}
 # Specify the dataset, variables on the x-axis, y-axis
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = RIDAGEYR,
            y = log10(LBXBPB))) +
   geom_point()
@@ -69,7 +69,7 @@ ggplot(nhanes_dataset,
 
 ```{r customize_ggplot}
 # Update axes labels
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = RIDAGEYR,
            y = log10(LBXBPB))) +
   geom_point() + 
@@ -77,7 +77,7 @@ ggplot(nhanes_dataset,
        y = "log10(blood Pb in ug/dL")
 
 # Change point size, transparency, shape 
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = RIDAGEYR,
            y = log10(LBXBPB))) +
   geom_point(size = 0.3, 
@@ -87,7 +87,7 @@ ggplot(nhanes_dataset,
        y = "log10(blood Pb in ug/dL")
 
 # Add color variable
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = RIDAGEYR,
            y = log10(LBXBPB),
            color = sex)) +
@@ -99,7 +99,7 @@ ggplot(nhanes_dataset,
        color = "Sex")
 
 # Change color palette
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = RIDAGEYR,
            y = log10(LBXBPB),
            color = sex)) +
@@ -112,7 +112,7 @@ ggplot(nhanes_dataset,
   scale_color_viridis_d()
 
 # Try another color palette
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = RIDAGEYR,
            y = log10(LBXBPB),
            color = sex)) +
@@ -125,7 +125,7 @@ ggplot(nhanes_dataset,
   scale_color_brewer(palette = "Spectral")
 
 # Change theme to preset features
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = RIDAGEYR,
            y = log10(LBXBPB),
            color = sex)) +
@@ -139,7 +139,7 @@ ggplot(nhanes_dataset,
 
 
 # Manually change plot theme features
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = RIDAGEYR,
            y = log10(LBXBPB),
            color = sex)) +
@@ -165,19 +165,19 @@ Make a scatter plot of cotinine (LBXCOT) on the x-axis and cadmium (LBXBCD) on t
 ```{r barplot}
 
 # Make a simple barplot
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = sex)) +
   geom_bar()
 
 # Add some colors
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = sex,
            fill = sex,
            color = sex)) +
   geom_bar()
 
 # Turn the plot horizontally
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = sex,
            fill = sex,
            color = sex)) +
@@ -185,7 +185,7 @@ ggplot(nhanes_dataset,
   coord_flip()
 
 # Add labels
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = sex,
            fill = sex,
            color = sex)) +
@@ -195,7 +195,7 @@ ggplot(nhanes_dataset,
        y = "Number of Participants")
 
 # Manually set the colors
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = sex,
            fill = sex)) +
   geom_bar() +
@@ -203,6 +203,16 @@ ggplot(nhanes_dataset,
        x = "Sex",
        y = "Number of Participants") +
   scale_fill_manual(values=c("#999999", "#E69F00"))
+
+# Plot two variables at once in stacked barchart
+ggplot(nhanes,
+       aes(x = sex,
+           fill = education)) +
+  geom_bar() +
+  labs(title = "Barplot by sex and education",
+       x = "Sex",
+       y = "Number of Participants")
+
 ```
 
 
@@ -212,25 +222,25 @@ ggplot(nhanes_dataset,
 ```{r histogram}
 
 # Histogram
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = LBXRBCSI)) +
   geom_histogram()
 
 # Adjust size of boxes
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = LBXRBCSI)) +
   geom_histogram(binwidth = 0.25) + 
   labs("Red Blood Cell Count (million cells/uL)")
 
 # Overlapping histograms
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = LBXIRN,
            fill = sex)) + #stratify by sex
   geom_histogram(binwidth = 10,
                  position = "identity") #default position is stack
 
 # Make a black and white plot with transparency
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = LBXIRN,
            fill = sex)) +
   geom_histogram(binwidth = 10,
@@ -246,7 +256,7 @@ ggplot(nhanes_dataset,
 ```{r density_plot}
 
 # Density plot
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = LBXRBCSI)) +
   geom_density(size=2, 
                color="dodgerblue") +
@@ -254,7 +264,7 @@ ggplot(nhanes_dataset,
 
 
 # Add density plot to a histogram
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = LBXRBCSI, y = ..density..)) +
   geom_histogram(fill = "lightgreen",
                  color = "seagreen",
@@ -268,21 +278,21 @@ ggplot(nhanes_dataset,
 ```{r scatterplot_lines}
 
 # Add a linear fit
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = RIDAGEYR,
            y = log10(LBXBPB))) +
   geom_point() +
   geom_smooth(method = lm)
 
 # Add a smoothing line
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = RIDAGEYR,
            y = log10(LBXBPB))) +
   geom_point() +
   geom_smooth()
 
 # Split by another variable
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = RIDAGEYR,
            y = log10(LBXBPB),
            shape = sex)) +
@@ -304,24 +314,24 @@ ggplot(nhanes_dataset,
 ```{r boxplot}
 
 # Boxplot
-ggplot(nhanes_dataset,
-       aes(x = log(LBXIRN))) +
+ggplot(nhanes,
+       aes(x = LBXIRN)) +
   geom_boxplot(fill = "#990000",
                color = "#3366FF",
                notch = T,
                notchwidth = .3)
 
 # Boxplot split by age groups
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = age_groups,
-           y = log(LBXIRN))) +
+           y = LBXIRN)) +
   geom_boxplot()
 
 
 # Boxplot split by age and sex, with colors!
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = age_groups,
-           y = log(LBXIRN))) +
+           y = LBXIRN)) +
   geom_boxplot(aes(fill = sex)) +
   labs(title = "Boxplot of Iron Levels",
        x="Age",
@@ -331,16 +341,16 @@ ggplot(nhanes_dataset,
 
 # Violin plot
 
-```{r violin_plot,eval=F}
+```{r violin_plot}
 
 # Basic violin plot
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = age_groups,
            y = log(LBXBPB))) + 
   geom_violin()
 
 # Add beeswarm data points on top
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = age_groups,
            y = log(LBXBPB))) + 
   geom_violin() +
@@ -349,7 +359,7 @@ ggplot(nhanes_dataset,
               alpha = 0.25)
 
 # Add colors
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = age_groups,
            y = log(LBXBPB),
            fill = age_groups)) + 
@@ -370,7 +380,7 @@ ggplot(nhanes_dataset,
 ```{r facet_wrap}
 
 # Stratified histograms in separate plots
-ggplot(nhanes_dataset,
+ggplot(nhanes,
        aes(x = LBXIRN,
            fill = sex)) +
   geom_histogram() +
@@ -384,7 +394,7 @@ ggplot(nhanes_dataset,
 
 ```{r assign_plot_objects}
 # Assign plots from earlier as objects
-viol_plot <- ggplot(nhanes_dataset,
+viol_plot <- ggplot(nhanes,
        aes(x = age_groups,
            y = log(LBXBPB),
            fill = age_groups)) + 
@@ -397,7 +407,7 @@ viol_plot <- ggplot(nhanes_dataset,
        x = "Age Group (years)",
        y = "log(blood lead) (ug/dL)")
 
-scatter_plot <- ggplot(nhanes_dataset,
+scatter_plot <- ggplot(nhanes,
        aes(x = RIDAGEYR,
            y = log10(LBXBPB),
            shape = sex)) +
@@ -411,7 +421,7 @@ scatter_plot <- ggplot(nhanes_dataset,
        x = "Age (years)",
        y = "log(blood lead)")
 
-bar_plot <- ggplot(nhanes_dataset,
+bar_plot <- ggplot(nhanes,
        aes(x = sex,
            fill = sex)) +
   geom_bar() +
@@ -420,7 +430,7 @@ bar_plot <- ggplot(nhanes_dataset,
        y = "Number of Participants") +
   scale_fill_manual(values=c("#999999", "#E69F00"))
 
-facet_plot <- ggplot(nhanes_dataset,
+facet_plot <- ggplot(nhanes,
        aes(x = LBXIRN,
            fill = sex)) +
   geom_histogram() +
