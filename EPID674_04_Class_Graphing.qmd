@@ -1,0 +1,503 @@
+---
+title: "EPID674 Epidemiologic Data Analysis using R"
+subtitle: "Graphing in R"
+author: "Kelly Bakulski, Lauren Middleton"
+date: "Last compiled on `r format(Sys.Date(), '%B %d, %Y')`"
+format: html
+editor: source
+---
+
+
+# Install new packages
+```{r}
+#| label: install_packages
+#| eval: false
+#| include: false
+
+# Install packages. Do this only once.
+options(repos="https://cran.rstudio.com" )
+install.packages("tidyverse")
+install.packages("here")
+install.packages("ggpubr")
+install.packages("vidiris")
+install.packages("RColorBrewer")
+
+# To avoid installing every time you knit: keep curly brackets eval=FALSE
+```
+
+
+# Load packages
+```{r}
+#| label: load_packages
+#| include: false
+
+##### Load for the current session, do this every time
+library(tidyverse)
+library(here)
+library(ggpubr)
+library(viridis)
+library(RColorBrewer)
+```
+
+
+# Load data
+```{r}
+#| label: read_data
+
+# Check the file path
+here("nhanes_class_dataset.rda")
+# Load the saved R data
+load(here("nhanes_class_dataset.rda"))
+```
+
+
+# Useful websites for ggplot information:
+* Online introduction book: **https://ggplot2-book.org/index.html**
+* For theory: **https://rkabacoff.github.io/datavis/**
+* How to code: **http://www.sthda.com/english/wiki/ggplot2-essentials**
+
+# Introduction to ggplot: Scatter plot
+
+```{r}
+#| label: introduction_ggplot
+
+# Specify the dataset, variables on the x-axis, y-axis
+ggplot(nhanes,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point()
+```
+
+# Customize a scatter plot
+
+```{r}
+#| label: customize_ggplot
+
+# Update axes labels
+ggplot(nhanes,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point() + 
+  labs(x = "Age in years", 
+       y = "log10(blood Pb in ug/dL")
+
+# Change point size, transparency, shape 
+ggplot(nhanes,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point(size = 0.3, 
+             alpha = 0.2, 
+             shape = 2) + 
+  labs(x = "Age in years", 
+       y = "log10(blood Pb in ug/dL")
+
+# Add color variable
+ggplot(nhanes,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB),
+           color = sex)) +
+  geom_point(size = 0.4, 
+             alpha = 0.2,
+             shape = 2) + 
+  labs(x = "Age in years", 
+       y = "log10(blood Pb in ug/dL",
+       color = "Sex")
+
+# Change color palette
+ggplot(nhanes,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB),
+           color = sex)) +
+  geom_point(size = 0.4, 
+             alpha = 0.2,
+             shape = 2) + 
+  labs(x = "Age in years", 
+       y = "log10(blood Pb in ug/dL",
+       color = "Sex") +
+  scale_color_viridis_d()
+
+# Try another color palette
+ggplot(nhanes,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB),
+           color = sex)) +
+  geom_point(size = 0.4, 
+             alpha = 0.2,
+             shape = 2) + 
+  labs(x = "Age in years", 
+       y = "log10(blood Pb in ug/dL",
+       color = "Sex") +
+  scale_color_brewer(palette = "Spectral")
+
+# Change theme to preset features
+ggplot(nhanes,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB),
+           color = sex)) +
+  geom_point(size = 0.4, 
+             alpha = 0.2,
+             shape = 2) + 
+  labs(x = "Age in years", 
+       y = "log10(blood Pb in ug/dL",
+       color = "Sex") + 
+  theme_classic()
+
+
+# Manually change plot theme features
+ggplot(nhanes,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB),
+           color = sex)) +
+  geom_point(size = 0.4, 
+             alpha = 0.2,
+             shape = 2) + 
+  labs(x = "Age in years", 
+       y = "log10(blood Pb in ug/dL",
+       color = "Sex") + 
+  theme(axis.text = element_text(color = "black", size = 10), #color and text size of axis labels
+        axis.title = element_text(size = 12),   #text size of axis titles
+        legend.title = element_text(size = 12), #text size of legend title
+        legend.text = element_text(size = 10))  #text size of legend labels
+```
+
+# Check your understanding!
+Make a scatter plot of cotinine (LBXCOT) on the x-axis and cadmium (LBXBCD) on the y-axis. Be sure to include axis labels with units. Experiment with changing the color, size, and transparency of the points. 
+
+
+# Scatter plot with lines of best fit
+
+```{r}
+#| label: scatterplot_lines
+
+# Add a linear fit
+ggplot(nhanes,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point() +
+  geom_smooth(method = lm)
+
+# Add a smoothing line
+ggplot(nhanes,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB))) +
+  geom_point() +
+  geom_smooth()
+
+# Split by another variable
+ggplot(nhanes,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB),
+           shape = sex)) +
+  geom_point(aes(color = sex,
+                 shape = sex),
+             size = 1,
+             alpha = 0.3) +
+  geom_smooth(method = lm,
+              aes(color = sex),
+              size = 1.5) +
+  labs(title = "Log(blood lead) by Age and Sex",
+       x = "Age (years)",
+       y = "log(blood lead)")
+```
+
+
+
+
+# Make a barplot: Categorical data
+
+```{r}
+#| label: barplot
+
+# Make a simple barplot
+ggplot(nhanes,
+       aes(x = sex)) +
+  geom_bar()
+
+# Add some colors
+ggplot(nhanes,
+       aes(x = sex,
+           fill = sex,
+           color = sex)) +
+  geom_bar()
+
+# Turn the plot horizontally
+ggplot(nhanes,
+       aes(x = sex,
+           fill = sex,
+           color = sex)) +
+  geom_bar() +
+  coord_flip()
+
+# Add labels
+ggplot(nhanes,
+       aes(x = sex,
+           fill = sex,
+           color = sex)) +
+  geom_bar() +
+  labs(title = "Barplot by sex",
+       x = "Sex",
+       y = "Number of Participants")
+
+# Manually set the colors
+ggplot(nhanes,
+       aes(x = sex,
+           fill = sex)) +
+  geom_bar() +
+  labs(title = "Barplot by sex",
+       x = "Sex",
+       y = "Number of Participants") +
+  scale_fill_manual(values=c("#999999", "#E69F00"))
+
+# Plot two variables at once in stacked barchart
+ggplot(nhanes,
+       aes(x = sex,
+           fill = education)) +
+  geom_bar() +
+  labs(title = "Barplot by sex and education",
+       x = "Sex",
+       y = "Number of Participants")
+
+```
+
+
+
+# Histogram: Numeric data
+
+```{r}
+#| label: histogram
+
+# Histogram
+ggplot(nhanes,
+       aes(x = LBXRBCSI)) +
+  geom_histogram()
+
+# Adjust size of boxes
+ggplot(nhanes,
+       aes(x = LBXRBCSI)) +
+  geom_histogram(binwidth = 0.25) + 
+  labs("Red Blood Cell Count (million cells/uL)")
+
+# Overlapping histograms
+ggplot(nhanes,
+       aes(x = LBXIRN,
+           fill = sex)) + #stratify by sex
+  geom_histogram(binwidth = 10,
+                 position = "identity") #default position is stack
+
+# Make a black and white plot with transparency
+ggplot(nhanes,
+       aes(x = LBXIRN,
+           fill = sex)) +
+  geom_histogram(binwidth = 10,
+                 position = "identity",
+                 alpha = 0.8) + #transparency
+  scale_fill_grey(start = 0,
+                  end = 0.75)
+```
+
+
+# Density plot
+
+```{r}
+#| label: density_plot
+
+# Density plot
+ggplot(nhanes,
+       aes(x = LBXRBCSI)) +
+  geom_density(size=2, 
+               color="dodgerblue") +
+  labs(x = "Red blood cell count (million cells/uL)")
+
+
+# Add density plot to a histogram
+ggplot(nhanes,
+       aes(x = LBXRBCSI, y = ..density..)) +
+  geom_histogram(fill = "lightgreen",
+                 color = "seagreen",
+                 binwidth = 0.25) +
+  geom_density()
+
+```
+
+
+# Boxplot
+
+```{r}
+#| label: boxplot
+
+# Boxplot
+ggplot(nhanes,
+       aes(x = LBXIRN)) +
+  geom_boxplot(fill = "#990000",
+               color = "#3366FF",
+               notch = T,
+               notchwidth = .3)
+
+# Boxplot split by age groups
+ggplot(nhanes,
+       aes(x = age_groups,
+           y = LBXIRN)) +
+  geom_boxplot()
+
+
+# Boxplot split by age and sex, with colors!
+ggplot(nhanes,
+       aes(x = age_groups,
+           y = LBXIRN)) +
+  geom_boxplot(aes(fill = sex)) +
+  labs(title = "Boxplot of Iron Levels",
+       x="Age",
+       y="Log(Iron levels)")
+```
+
+
+# Violin plot
+
+```{r}
+#| label: violin_plot
+
+# Basic violin plot
+ggplot(nhanes,
+       aes(x = age_groups,
+           y = log(LBXBPB))) + 
+  geom_violin()
+
+# Add beeswarm data points on top
+ggplot(nhanes,
+       aes(x = age_groups,
+           y = log(LBXBPB))) + 
+  geom_violin() +
+  geom_jitter(shape = 16, #circle
+              position = position_jitter(0.2),
+              alpha = 0.25)
+
+# Add colors
+ggplot(nhanes,
+       aes(x = age_groups,
+           y = log(LBXBPB),
+           fill = age_groups)) + 
+  geom_violin() +
+  geom_jitter(shape = 16, #circle
+              position = position_jitter(0.2),
+              alpha = 0.25) +
+  scale_fill_brewer(palette = "Blues") +
+  labs(title = "Violin plots by age group",
+       x = "Age Group (years)",
+       y = "Log(Blood Lead) (ug/dL)")
+```
+
+
+
+# Facet wrap: Display categories in separate plots
+ 
+```{r}
+#| label: facet_wrap
+
+# Stratified histograms in separate plots
+ggplot(nhanes,
+       aes(x = LBXIRN,
+           fill = sex)) +
+  geom_histogram() +
+  facet_wrap(vars(sex),
+             ncol = 1)
+
+```
+
+
+# Assign plots as objects
+
+```{r}
+#| label: assign_plot_objects
+
+# Assign plots from earlier as objects
+viol_plot <- ggplot(nhanes,
+       aes(x = age_groups,
+           y = log(LBXBPB),
+           fill = age_groups)) + 
+  geom_violin() +
+  geom_jitter(shape = 16, #circle
+              position = position_jitter(0.2),
+              alpha = 0.25) +
+  scale_fill_brewer(palette = "Blues") +
+  labs(title = "Violin plots by age group",
+       x = "Age Group (years)",
+       y = "log(blood lead) (ug/dL)")
+
+scatter_plot <- ggplot(nhanes,
+       aes(x = RIDAGEYR,
+           y = log10(LBXBPB),
+           shape = sex)) +
+  geom_point(aes(color = sex,
+                 shape = sex),
+             size = 1,
+             alpha = 0.5) +
+  geom_smooth(method = lm,
+              aes(color = sex)) +
+  labs(title = "Log(blood lead) by age and sex",
+       x = "Age (years)",
+       y = "log(blood lead)")
+
+bar_plot <- ggplot(nhanes,
+       aes(x = sex,
+           fill = sex)) +
+  geom_bar() +
+  labs(title = "Barplot by sex",
+       x = "Sex",
+       y = "Number of Participants") +
+  scale_fill_manual(values=c("#999999", "#E69F00"))
+
+facet_plot <- ggplot(nhanes,
+       aes(x = LBXIRN,
+           fill = sex)) +
+  geom_histogram() +
+  facet_wrap(vars(sex),
+             ncol = 1) + 
+  labs(title = "Histogram of iron by sex",
+         x = "Serum Iron in ug/dL")
+```
+
+
+# Combine multiple types of plots on one page
+
+```{r}
+#| label: multiplaneled_plots
+
+# View the four plots on one page
+ggarrange(bar_plot, viol_plot, scatter_plot, facet_plot,
+          ncol = 2,
+          nrow = 2,
+          labels = LETTERS[1:4]) #add letters A-D as figure labels
+
+
+
+# Assign compiled plot object
+compiled_plots <- ggarrange(bar_plot, viol_plot, scatter_plot, facet_plot,
+                            ncol = 2,
+                            nrow = 2,
+                            labels = LETTERS[1:4])
+```
+
+
+# Save and export plots
+
+```{r}
+#| label: saving_plots
+
+# Recommended to save figures as both pdf for high-quality viewing and png for presentations
+
+# Save the plot as a pdf for viewing at a high resolution
+ggsave(filename = here("compiled_nhanes_plots.pdf"),
+       plot = compiled_plots,
+       width = 14,
+       height = 9)
+
+# Save the plot as a png for presentation with lower resolution
+ggsave(filename = here("compiled_nhanes_plots.png"),
+       plot = compiled_plots,
+       units = "in",
+       width = 14,
+       height = 9,
+       dpi = 300)
+```
+
+
