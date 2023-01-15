@@ -15,6 +15,9 @@ editor: source
 #| include: false
 
 # Install packages. Do this only once.
+
+# To avoid installing every time you knit: keep chunk option #| eval: false
+
 options(repos="https://cran.rstudio.com" )
 install.packages("tidyverse")
 install.packages("here")
@@ -22,7 +25,6 @@ install.packages("ggpubr")
 install.packages("vidiris")
 install.packages("RColorBrewer")
 
-# To avoid installing every time you knit: keep curly brackets eval=FALSE
 ```
 
 
@@ -37,6 +39,7 @@ library(here)
 library(ggpubr)
 library(viridis)
 library(RColorBrewer)
+
 ```
 
 
@@ -47,14 +50,14 @@ library(RColorBrewer)
 # Check the file path
 here("nhanes_class_dataset.rda")
 # Load the saved R data
-load(here("nhanes_class_dataset.rda"))
+load(here("nhanes_class_dataset.rda"), verbose = TRUE)
 ```
 
 
 # Useful websites for ggplot information:
 * Online introduction book: **https://ggplot2-book.org/index.html**
 * For theory: **https://rkabacoff.github.io/datavis/**
-* How to code: **http://www.sthda.com/english/wiki/ggplot2-essentials**
+* How to code: **http://www.sthda.com/english/wiki/ggplot2-essentials*
 
 # Introduction to ggplot: Scatter plot
 
@@ -63,8 +66,8 @@ load(here("nhanes_class_dataset.rda"))
 
 # Specify the dataset, variables on the x-axis, y-axis
 ggplot(nhanes,
-       aes(x = RIDAGEYR,
-           y = log10(LBXBPB))) +
+       aes(x = LBXIRN,
+           y = LBXRBCSI)) +
   geom_point()
 ```
 
@@ -75,84 +78,84 @@ ggplot(nhanes,
 
 # Update axes labels
 ggplot(nhanes,
-       aes(x = RIDAGEYR,
-           y = log10(LBXBPB))) +
+       aes(x = LBXIRN,
+           y = LBXRBCSI)) +
   geom_point() + 
-  labs(x = "Age in years", 
-       y = "log10(blood Pb in ug/dL")
+  labs(x = "Serum iron levels in ug/dL", 
+       y = "Red blood cell count in million cells/uL")
 
 # Change point size, transparency, shape 
 ggplot(nhanes,
-       aes(x = RIDAGEYR,
-           y = log10(LBXBPB))) +
+       aes(x = LBXIRN,
+           y = LBXRBCSI)) +
   geom_point(size = 0.3, 
              alpha = 0.2, 
              shape = 2) + 
-  labs(x = "Age in years", 
-       y = "log10(blood Pb in ug/dL")
+  labs(x = "Serum iron levels in ug/dL", 
+       y = "Red blood cell count in million cells/uL")
 
 # Add color variable
 ggplot(nhanes,
-       aes(x = RIDAGEYR,
-           y = log10(LBXBPB),
+       aes(x = LBXIRN,
+           y = LBXRBCSI,
            color = sex)) +
   geom_point(size = 0.4, 
              alpha = 0.2,
              shape = 2) + 
-  labs(x = "Age in years", 
-       y = "log10(blood Pb in ug/dL",
+  labs(x = "Serum iron levels in ug/dL", 
+       y = "Red blood cell count in million cells/uL",
        color = "Sex")
 
 # Change color palette
 ggplot(nhanes,
-       aes(x = RIDAGEYR,
-           y = log10(LBXBPB),
+       aes(x = LBXIRN,
+           y = LBXRBCSI,
            color = sex)) +
   geom_point(size = 0.4, 
              alpha = 0.2,
              shape = 2) + 
-  labs(x = "Age in years", 
-       y = "log10(blood Pb in ug/dL",
-       color = "Sex") +
+  labs(x = "Serum iron levels in ug/dL", 
+       y = "Red blood cell count in million cells/uL",
+       color = "Sex of participant") +
   scale_color_viridis_d()
 
 # Try another color palette
 ggplot(nhanes,
-       aes(x = RIDAGEYR,
-           y = log10(LBXBPB),
+       aes(x = LBXIRN,
+           y = LBXRBCSI,
            color = sex)) +
   geom_point(size = 0.4, 
              alpha = 0.2,
              shape = 2) + 
-  labs(x = "Age in years", 
-       y = "log10(blood Pb in ug/dL",
+  labs(x = "Serum iron levels in ug/dL", 
+       y = "Red blood cell count in million cells/uL",
        color = "Sex") +
   scale_color_brewer(palette = "Spectral")
 
 # Change theme to preset features
 ggplot(nhanes,
-       aes(x = RIDAGEYR,
-           y = log10(LBXBPB),
+       aes(x = LBXIRN,
+           y = LBXRBCSI,
            color = sex)) +
   geom_point(size = 0.4, 
              alpha = 0.2,
              shape = 2) + 
-  labs(x = "Age in years", 
-       y = "log10(blood Pb in ug/dL",
+  labs(x = "Serum iron levels in ug/dL", 
+       y = "Red blood cell count in million cells/uL",
        color = "Sex") + 
   theme_classic()
 
 
 # Manually change plot theme features
 ggplot(nhanes,
-       aes(x = RIDAGEYR,
-           y = log10(LBXBPB),
+       aes(x = LBXIRN,
+           y = LBXRBCSI,
            color = sex)) +
   geom_point(size = 0.4, 
              alpha = 0.2,
              shape = 2) + 
-  labs(x = "Age in years", 
-       y = "log10(blood Pb in ug/dL",
+  labs(x = "Serum iron levels in ug/dL", 
+       y = "Red blood cell count in million cells/uL",
        color = "Sex") + 
   theme(axis.text = element_text(color = "black", size = 10), #color and text size of axis labels
         axis.title = element_text(size = 12),   #text size of axis titles
@@ -171,33 +174,44 @@ Make a scatter plot of cotinine (LBXCOT) on the x-axis and cadmium (LBXBCD) on t
 
 # Add a linear fit
 ggplot(nhanes,
-       aes(x = RIDAGEYR,
-           y = log10(LBXBPB))) +
+       aes(x = LBXIRN,
+           y = LBXRBCSI)) +
   geom_point() +
   geom_smooth(method = lm)
 
 # Add a smoothing line
 ggplot(nhanes,
-       aes(x = RIDAGEYR,
-           y = log10(LBXBPB))) +
+       aes(x = LBXIRN,
+           y = LBXRBCSI)) +
   geom_point() +
   geom_smooth()
 
+
+# No points, just line and standard error
+ggplot(nhanes,
+       aes(x = LBXIRN,
+           y = LBXRBCSI)) +
+  geom_smooth(method = lm,
+              linewidth = 1.5,
+              se = TRUE,
+              fill = "red") +
+  labs(x = "Serum iron levels (ug/dL)",
+       y = "Red blood cell count (million cells/uL)")
+
 # Split by another variable
 ggplot(nhanes,
-       aes(x = RIDAGEYR,
-           y = log10(LBXBPB),
-           shape = sex)) +
-  geom_point(aes(color = sex,
-                 shape = sex),
-             size = 1,
+       aes(x = LBXIRN,
+           y = LBXRBCSI,
+           shape = sex,
+           color = sex)) +
+  geom_point(size = 1,
              alpha = 0.3) +
   geom_smooth(method = lm,
-              aes(color = sex),
-              size = 1.5) +
-  labs(title = "Log(blood lead) by Age and Sex",
-       x = "Age (years)",
-       y = "log(blood lead)")
+              linewidth = 1.5) +
+  labs(title = "Red blood cell count by iron and sex",
+       x = "Serum iron levels (ug/dL)",
+       y = "Red blood cell count (million cells/uL)")
+
 ```
 
 
@@ -337,7 +351,9 @@ ggplot(nhanes,
 ggplot(nhanes,
        aes(x = age_groups,
            y = LBXIRN)) +
-  geom_boxplot()
+  geom_boxplot(fill = "darkorchid") +
+  labs(x = "Age groups",
+       y = "Serum iron levels (ug/dL)")
 
 
 # Boxplot split by age and sex, with colors!
@@ -347,7 +363,7 @@ ggplot(nhanes,
   geom_boxplot(aes(fill = sex)) +
   labs(title = "Boxplot of Iron Levels",
        x="Age",
-       y="Log(Iron levels)")
+       y="Iron levels")
 ```
 
 
@@ -359,31 +375,39 @@ ggplot(nhanes,
 # Basic violin plot
 ggplot(nhanes,
        aes(x = age_groups,
-           y = log(LBXBPB))) + 
+           y = LBXIRN)) + 
   geom_violin()
+
+# Draw quantiles
+ggplot(nhanes,
+       aes(x = age_groups,
+           y = LBXIRN)) + 
+  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75), 
+              fill = "darkorchid",
+              alpha = 0.2)
 
 # Add beeswarm data points on top
 ggplot(nhanes,
        aes(x = age_groups,
-           y = log(LBXBPB))) + 
-  geom_violin() +
+           y = LBXIRN)) + 
+  geom_violin(fill = "darkorchid", alpha = 0.2) +
   geom_jitter(shape = 16, #circle
               position = position_jitter(0.2),
-              alpha = 0.25)
+              alpha = 0.15)
 
 # Add colors
 ggplot(nhanes,
        aes(x = age_groups,
-           y = log(LBXBPB),
+           y = LBXIRN,
            fill = age_groups)) + 
   geom_violin() +
   geom_jitter(shape = 16, #circle
               position = position_jitter(0.2),
-              alpha = 0.25) +
+              alpha = 0.15) +
   scale_fill_brewer(palette = "Blues") +
   labs(title = "Violin plots by age group",
        x = "Age Group (years)",
-       y = "Log(Blood Lead) (ug/dL)")
+       y = "Serum Iron Levels (ug/dL)")
 ```
 
 
@@ -412,7 +436,7 @@ ggplot(nhanes,
 # Assign plots from earlier as objects
 viol_plot <- ggplot(nhanes,
        aes(x = age_groups,
-           y = log(LBXBPB),
+           y = LBXIRN,
            fill = age_groups)) + 
   geom_violin() +
   geom_jitter(shape = 16, #circle
@@ -421,11 +445,11 @@ viol_plot <- ggplot(nhanes,
   scale_fill_brewer(palette = "Blues") +
   labs(title = "Violin plots by age group",
        x = "Age Group (years)",
-       y = "log(blood lead) (ug/dL)")
+       y = "Serum iron levels (ug/dL)")
 
 scatter_plot <- ggplot(nhanes,
-       aes(x = RIDAGEYR,
-           y = log10(LBXBPB),
+       aes(x = LBXIRN,
+           y = LBXRBCSI,
            shape = sex)) +
   geom_point(aes(color = sex,
                  shape = sex),
@@ -433,9 +457,9 @@ scatter_plot <- ggplot(nhanes,
              alpha = 0.5) +
   geom_smooth(method = lm,
               aes(color = sex)) +
-  labs(title = "Log(blood lead) by age and sex",
-       x = "Age (years)",
-       y = "log(blood lead)")
+  labs(title = "Scatter plot red blood cells by iron and sex",
+       x = "Serum iron levels",
+       y = "Red blood cell count")
 
 bar_plot <- ggplot(nhanes,
        aes(x = sex,
