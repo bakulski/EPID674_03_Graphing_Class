@@ -14,6 +14,7 @@ editor: source
 #| eval: false
 #| include: false
 
+# Here are my edits
 # Install packages. Do this only once.
 
 # To avoid installing every time you knit: keep chunk option #| eval: false
