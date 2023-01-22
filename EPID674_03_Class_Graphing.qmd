@@ -14,7 +14,6 @@ editor: source
 #| eval: false
 #| include: false
 
-# Here are my edits
 # Install packages. Do this only once.
 
 # To avoid installing every time you knit: keep chunk option #| eval: false
@@ -272,6 +271,15 @@ ggplot(nhanes,
        x = "Sex",
        y = "Number of Participants")
 
+# Plot two variables at once in side by side barchart
+ggplot(nhanes,
+       aes(x = sex,
+           fill = education)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Barplot by sex and education",
+       x = "Sex",
+       y = "Number of Participants")
+
 ```
 
 
@@ -346,7 +354,7 @@ ggplot(nhanes,
   geom_boxplot(fill = "#990000",
                color = "#3366FF",
                notch = T,
-               notchwidth = .3)
+               notchwidth = 0.5)
 
 # Boxplot split by age groups
 ggplot(nhanes,
@@ -410,6 +418,10 @@ ggplot(nhanes,
        x = "Age Group (years)",
        y = "Serum Iron Levels (ug/dL)")
 ```
+
+# Check your understanding!
+
+You want to visualize the relationship between iron status (iron_status) and red blood cells (LBXRBCSI). Determine an appropriate plot type, based on the variable types. Make a plot of these two variables. Practice updating the labels, colors, and other features.
 
 
 
